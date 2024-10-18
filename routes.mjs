@@ -22,4 +22,17 @@ router.get("/standings", (req, res) => {
     res.render("standings", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, standings:true})
 })
 
+router.get("/synthimata", (req, res) => {
+    res.render("synthimata", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, content:true})
+})
+
+router.get("/photos", (req, res) => {
+    // scripts.push({ script: 'js/photos.js' })
+    res.render("photos", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, content:true})
+})
+
+router.get("/videos", (req, res) => {
+    res.render("videos", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, content:true})
+})
+
 export {router}

@@ -42,14 +42,14 @@ body{
         background-image: url('/imgs/wall_2500w.jpg');
     }
 }
-.main>a, p>a {
-    color:var(--secondary) !important;
-}
 .main>a:visited, p>a{
-    color:var(--accent1) !important;
+    color:var(--primary) !important;
 }
 .main>a:hover, p>a{
     color:var(--accent2) !important;
+}
+.main>a, p>a {
+    color:var(--secondary) !important;
 }
 #topBar{
     margin:0;
@@ -132,12 +132,10 @@ i:hover{
 .teamlogo{
     height:50px;
 }
-.main-element>h2{
+.main-element>h2, .main-element>h5, .main-element>h6{
     color:var(--secondary)
 }
-.main-element>h5{
-    color:var(--secondary)
-}
+
 .main-element>a{
     color:var(--accent2)
 }

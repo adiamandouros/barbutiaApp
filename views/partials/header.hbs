@@ -24,9 +24,8 @@
 
 <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
     <div class="container-fluid">
-        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            Menu
-            <span class="navbar-toggler-icon"></span>
+        <button class="btn btn-outline-secondary navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon navbar"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -43,7 +42,7 @@
                     <a class="nav-link {{#if standings}}active{{/if}}" href="/standings">Βαθμολογία</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="contentDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle {{#if content}}active{{/if}}" id="contentDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Υλικό
                     </a>
                     <ul class="dropdown-menu" data-bs-theme="dark" aria-labelledby="contentDropdown">
@@ -56,7 +55,7 @@
             </ul>
             <form class="d-flex" role="search">
                 <input class="form-control me-2 focus-ring" type="search" placeholder="Αναζ. στη σελίδα" aria-label="Search" name="search">
-                <button class="btn btn-outline-success" type="submit">Ψάξε</button>
+                <button class="btn btn-outline-secondary" type="submit">Ψάξε</button>
             </form>
         </div>
     </div>
