@@ -8,20 +8,25 @@
 
     <div class="container-xxl main-element bg-dark main-card my-1 py-2">
         <h2>ΕΠΟΜΕΝΟΣ ΑΓΩΝΑΣ</h2>
+        {{#if nextGame}}
         <div class="row align-items-center" id="nextGameLine">
             <span class="text-start text-md-end col-md text-nowrap">
-                <img src="" alt="team1 logo" class="teamlogo" id="team1Logo">
-                <span class="teamName" id="team1"></span>
+                <img src="{{nextGame.teams.team1Logo}}" alt="team1 logo" class="teamlogo" id="team1Logo">
+                <span class="teamName" id="team1">{{nextGame.teams.team1}}</span>
             </span>
             <span class="col col-md-1">-</span>
             <span class="text-end text-md-start col-md text-nowrap">
-                <span class="teamName" id="team2"></span>
-                <img src="" alt="team2 logo" class="teamlogo" id="team2Logo">
+                <span class="teamName" id="team2">{{nextGame.teams.team2}}</span>
+                <img src="{{nextGame.teams.team2Logo}}" alt="team2 logo" class="teamlogo" id="team2Logo">
             </span>
         </div>
 
-        <p id="nextGameDate"></p>
-        <a id="nextGamePlace" href="https://www.google.com/maps/search"></a>
+        <p id="nextGameDate">{{nextGame.date}}</p>
+        <a id="nextGamePlace" href="https://www.google.com/maps/search/?api=1&query={{nextGame.place}}">{{nextGame.place}}</a>
+        {{/if}}
+        {{#unless nextGame}}
+            Δεν βρέθηκε αγώνας!
+        {{/unless}}
     </div>
 
     <div class="container-xxl main-element my-1 py-2">
