@@ -10,13 +10,12 @@ const scripts = [{script: 'js/yolk.js'}]
 
 router.get("/", async (req, res) => {
     const upcomingMatchesURL = "https://www.basketaki.com/teams/barboutia/schedule"
-    // const upcomingMatchesURL = "asdf"
-    const ourLogo = "https://basketaki-web.b-cdn.net/teams/barboutia.png"
+    const ourLogo = "/imgs/logo-transparent.png"
     const pageScraper= new PageScraper(upcomingMatchesURL)
     const nextGame = [] //not an object, to cooperate with handlebars
     
     try{
-        await pageScraper.fetchData()
+        await pageScraper.initialize()
         const data = await pageScraper.getData()
         const $ = data!=null ? await cheerio.load(data) : null
 
@@ -26,7 +25,7 @@ router.get("/", async (req, res) => {
         const teamLogo = $(match).find('.team-meta__logo a img').attr('src').trim()
         const date = $(match).find('td:nth-child(2)').text().trim()
         const place = $(match).find('.team-result__assists').text().trim()
-        const isHome = (match).find('.team-result__status').text().trim()==="Home" ? true : false
+        const isHome = $(match).find('.team-result__status').text().trim()==="Home" ? true : false
         nextGame.place = place
         nextGame.date = date
 

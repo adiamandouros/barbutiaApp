@@ -6,12 +6,11 @@ class PageScraper {
         this.url = url
     }
 
-    async fetchData(){
+    async initialize(){
         try{
             const response = await axios.get(this.url)
             this.data = response.data
             console.log("GOT DATA!")
-            // const document = cheerio.load(response.data)
         }catch(error){
             console.error("Problem during data fetch!")
             console.error(error)

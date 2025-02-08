@@ -1,8 +1,6 @@
 :root {
-    --primary: #552973;
-    --secondary: #B472AD;
-    --accent1: #652D92;
-    --accent2: #E69AC2;
+    --primary: #662e93;
+    --secondary: #e79bc0;
     font-size: 16px;
 }
 @font-face {
@@ -42,13 +40,16 @@ body{
         background-image: url('/imgs/wall_2500w.jpg');
     }
 }
-.main>a:visited, p>a{
+.main>a, p>a {
+    color:var(--secondary) !important;
+}
+.main>a:hover, p>a:hover{
+    color:var(--secondary) !important;
+}
+.main>a:visited, p>a:visited{
     color:var(--primary) !important;
 }
-.main>a:hover, p>a{
-    color:var(--accent2) !important;
-}
-.main>a, p>a {
+.main>a:hover, p>a:hover{
     color:var(--secondary) !important;
 }
 #topBar{
@@ -70,13 +71,11 @@ h1{
 .neonText {
     text-shadow:
         0 0 0.0875em #fff,
-        0 0 0.125em var(--accent2),
-        0 0 0.2625em var(--accent2),
-        0 0 0.525em var(--accent2),
+        0 0 0.125em var(--secondary),
+        0 0 0.2625em var(--secondary),
         0 0 1.025em var(--primary),
         0 0 1.15em var(--primary),
-        0 0 1.275em var(--primary),
-        0 0 1.8875em var(--primary);
+        0 0 1.275em var(--primary);
 }
 form > * {
     z-index: 5;
@@ -137,5 +136,5 @@ i:hover{
 }
 
 .main-element>a{
-    color:var(--accent2)
+    color:var(--secondary)
 }
