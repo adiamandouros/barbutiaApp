@@ -40,17 +40,14 @@ body{
         background-image: url('/imgs/wall_2500w.jpg');
     }
 }
-.main>a, p>a {
+.main a{
     color:var(--secondary) !important;
 }
-.main>a:hover, p>a:hover{
+.main a:hover{
     color:var(--secondary) !important;
 }
-.main>a:visited, p>a:visited{
+.main a:visited{
     color:var(--primary) !important;
-}
-.main>a:hover, p>a:hover{
-    color:var(--secondary) !important;
 }
 #topBar{
     margin:0;

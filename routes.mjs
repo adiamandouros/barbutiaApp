@@ -58,8 +58,117 @@ router.get("/roster", async (req,res) => {
     res.render("roster", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, roster:true})
 })
 
-router.get("/matches", (req, res) => {
-    res.render("matches", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, matches:true})
+router.get("/matches", async(req, res) => {
+
+    const upcomingMatchesURL = "https://www.basketaki.com/teams/barboutia/schedule"
+    const ourLogo = "/imgs/logo-transparent.png"
+    const futurePageScraper= new PageScraper(upcomingMatchesURL)
+    const futureMatchesArray = [] //not an object, to cooperate with handlebars
+    
+    try{
+        await futurePageScraper.initialize()
+        const data = await futurePageScraper.getData()
+        const $ = data!=null ? await cheerio.load(data) : null
+
+        //Basketaki td names are stupid.
+        const matches = $("tbody tr").each((index, row) => {
+            const match = {};
+
+            const teamName = $(row).find('.team-meta__name').text().trim()
+            const teamLogo = $(row).find('.team-meta__logo a img').attr('src').trim()
+            const date = $(row).find('td:nth-child(2)').text().trim()
+            const place = $(row).find('.team-result__assists').text().trim()
+            const league = $(row).find('.team-result__points').text().trim()
+            const isHome = $(row).find('.team-result__status').text().trim()==="Home" ? true : false
+            match.date = date
+            match.place = place
+            match.league = league
+
+            console.log(date)
+            console.log(teamName)
+            console.log(teamLogo)
+            console.log(place)
+
+            if (isHome){
+                match.teams = {
+                    team1: "Μπαρμπούτια",
+                    team1Logo: ourLogo,
+                    team2 : teamName,
+                    team2Logo: teamLogo
+                }
+            }else{
+                match.teams = {
+                    team1: teamName,
+                    team1Logo: teamLogo,
+                    team2 : "Μπαρμπούτια",
+                    team2Logo: ourLogo
+                }
+            }
+            futureMatchesArray.push(match)
+        })
+
+        console.log(futureMatchesArray)
+
+        // matchesArray.push(1) //So handlebars will know the array is not []
+    }catch(err){
+        console.error("No proper data fetch")
+        console.error(err)
+    }
+
+    const matchHistoryURL = "https://www.basketaki.com/teams/barboutia/results"
+    const historyPageScraper= new PageScraper(matchHistoryURL)
+    const matchHistoryArray = []
+    
+    try{
+        await historyPageScraper.initialize()
+        const data = await historyPageScraper.getData()
+        const $ = data!=null ? await cheerio.load(data) : null
+
+        //Basketaki td names are stupid.
+        const matches = $("tbody tr").each((index, row) => {
+            const match = {};
+
+            const teamName = $(row).find('.team-meta__name').text().trim()
+            const teamLogo = $(row).find('.team-meta__logo a img').attr('src').trim()
+            const date = $(row).find('td:nth-child(1)').text().trim()
+            const article = $(row).find('td:nth-child(8) a').attr('href').trim()
+            const league = $(row).find('.team-result__points').text().trim()
+            const result = $(row).find('td:nth-child(3)').text().trim()
+            const score = $(row).find('td:nth-child(4)').text().trim()
+            const isHome = $(row).find('.team-result__status').text().trim()==="Home" ? true : false
+            match.date = date
+            match.article = "https://www.basketaki.com" + article
+            match.league = league
+            match.score = score
+            match.win = result ==='W' ? true : false;
+
+            if (isHome){
+                match.teams = {
+                    team1: "Μπαρμπούτια",
+                    team1Logo: ourLogo,
+                    team2 : teamName,
+                    team2Logo: teamLogo
+                }
+            }else{
+                match.teams = {
+                    team1: teamName,
+                    team1Logo: teamLogo,
+                    team2 : "Μπαρμπούτια",
+                    team2Logo: ourLogo
+                }
+            }
+            matchHistoryArray.push(match)
+        })
+
+        console.log(matchHistoryArray)
+
+        // matchesArray.push(1) //So handlebars will know the array is not []
+    }catch(err){
+        console.error("No proper data fetch")
+        console.error(err)
+    }
+
+    res.render("matches", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, nextMatches: futureMatchesArray, previousMatches:matchHistoryArray, matches:true})
 })
 
 router.get("/standings", (req, res) => {

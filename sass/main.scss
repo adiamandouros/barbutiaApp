@@ -1,9 +1,12 @@
-$secondary: #ef941d;
+$primary: #662e93;
+$secondary: #e79bc0;
+$tertiary: #ef941d;
+$warning: $tertiary;
 $dark: #140519;
 
 .navbar-toggler {
-    color: $secondary !important;
-    background-color: $secondary !important;
+    color: $tertiary !important;
+    background-color: $tertiary !important;
 }
 @import '../node_modules/bootstrap/scss/bootstrap';
 

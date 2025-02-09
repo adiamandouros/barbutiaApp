@@ -1,8 +1,60 @@
 <div class="container-fluid main">
-    <div class="container-xxl main-element bg-dark main-card my-1 py-2">
+    <div class="container-xxl main-element bg-dark main-card my-1 py-2 rounded">
         <a href="https://www.basketaki.com/teams/barboutia/schedule">Μελλοντικοί αγώνες</a>
     </div>
+    {{#if nextMatches}}
+        {{#each nextMatches}}
+            <div class="container-xxl main-match bg-dark main-card my-1 py-2">
+                <span class="row justify-content-center align-items-center">
+                    <span class="col-md text-nowrap text-start text-md-end">
+                        <img src="{{this.teams.team1Logo}}" alt="team1 logo" class="teamlogo">
+                        <span class="teamName fw-bold"> {{this.teams.team1}}</span>
+                    </span>
+                    <span class="col-md col-lg-2 text-nowrap"></span>
+                    <span class="col-md text-nowrap text-end text-md-start">
+                        <span class="teamName fw-bold">{{this.teams.team2}} </span>
+                        <img src="{{this.teams.team2Logo}}" alt="team2 logo" class="teamlogo" id="team2Logo">
+                    </span>
+                </span>
+                <p class="justify-content-around row matchDescription align-items-center p-0 m-0 fw-light">
+                    <span class="col">{{this.league}}</span>
+                    <span class="col"><a href="https://www.google.com/maps/search/?api=1&query={{this.place}}">{{this.place}}</a></span>
+                    <span class="col">{{this.date}}</span>
+                </p>
+            </div>
+        {{/each}}
+    {{/if}}
+    {{#unless nextMatches}}
+        Δεν βρέθηκε αγώνας!
+    {{/unless}}
     <div class="container-xxl main-element bg-dark main-card my-1 py-2">
         <a href="https://www.basketaki.com/teams/barboutia/results">Ιστορικό</a>
     </div>
+    {{#if previousMatches}}
+        {{#each previousMatches}}
+            <div class="container-xxl main-match bg-dark main-card my-1 py-2 rounded">
+                <span class="row justify-content-center align-items-center">
+                    <span class="col-md text-nowrap text-start text-md-end">
+                        <img src="{{this.teams.team1Logo}}" alt="team1 logo" class="teamlogo">
+                        <span class="teamName fw-bold"> {{this.teams.team1}}</span>
+                    </span>
+                    <span class="col-md col-lg-2 text-nowrap{{#if this.win}} text-success{{/if}}{{#unless this.win}} text-danger{{/unless}}">
+                        {{this.score}}
+                    </span>
+                    <span class="col-md text-nowrap text-end text-md-start">
+                        <span class="teamName fw-bold">{{this.teams.team2}} </span>
+                        <img src="{{this.teams.team2Logo}}" alt="team2 logo" class="teamlogo" id="team2Logo">
+                    </span>
+                </span>
+                <p class="justify-content-around row matchDescription align-items-center p-0 m-0 fw-light">
+                    <span class="col">{{this.league}}</span>
+                    <span class="col link-secondary"><a href="{{this.article}}">Ρεζουμέ</a></span>
+                    <span class="col">{{this.date}}</span>
+                </p>
+            </div>
+        {{/each}}
+    {{/if}}
+    {{#unless previousMatches}}
+        Δεν βρέθηκε αγώνας!
+    {{/unless}}
 </div>
