@@ -20,7 +20,7 @@
         </div>
 
         <p id="nextGameDate">{{nextGame.date}}</p>
-        <a id="nextGamePlace" href="https://www.google.com/maps/search/?api=1&query={{nextGame.place}}">{{nextGame.place}}</a>
+        <a id="nextGamePlace" href={{nextGame.placeLink}}>{{nextGame.place}}</a>
         {{/if}}
         {{#unless nextGame}}
             Δεν βρέθηκε αγώνας!
