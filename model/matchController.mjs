@@ -3,6 +3,7 @@ import { getAllFutureMatchesFromDB, getAllCompletedMatchesFromDB, getNextMatchFr
 export const getNextMatch = async (req, res, next) => {
     try {
         const nextMatch = await getNextMatchFromDB()
+        const court = await nextMatch.getCourt()
         // req.nextMatch = nextMatch ? nextMatch.toJSON() : null
         const ourTeam = "Μπαρμπούτια"
         const ourLogo = "/imgs/logo-transparent.png"
@@ -22,9 +23,11 @@ export const getNextMatch = async (req, res, next) => {
                 team2Logo: ourLogo
             }
         }
+        
         req.nextGame.place = nextMatch.place
         req.nextGame.isHome = nextMatch.isHome
         req.nextGame.league = nextMatch.league
+        req.nextGame.placeLink = court.link
 
         const date = new Date(nextMatch.date)
         req.nextGame.date = new Intl.DateTimeFormat('el-GR', { 
@@ -45,40 +48,42 @@ export const getNextMatch = async (req, res, next) => {
 
 export const getFutureMatches = async (req, res, next) => {
     try {
-        const futureMatchesResponse = await getAllFutureMatchesFromDB()
-        const futureMatches = futureMatchesResponse.map(match => match.toJSON())
+        const futureMatches = await getAllFutureMatchesFromDB()
         if (futureMatches.length !== 0){
             await cleanFutureMatches()
         }
         const ourLogo = "/imgs/logo-transparent.png"
-        req.futureMatches = futureMatches.map(match => {
+        req.futureMatches = await Promise.all(futureMatches.map(async match => {
+            const court = await match.getCourt()
+            const matchObj = match.toJSON()
+
             // console.log(match)
-            const date = new Date(match.date)
-            match.date = new Intl.DateTimeFormat('el-GR', { 
+            const date = new Date(matchObj.date);
+            matchObj.date = new Intl.DateTimeFormat('el-GR', { 
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit',
                 hour12: false
-            }).format(date)
-            if (match.isHome){
-                match.teams = {
+            }).format(date);
+             matchObj.teams = match.isHome
+                ? {
                     team1: "Μπαρμπούτια",
                     team1Logo: ourLogo,
-                    team2 : match.teamName,
+                    team2: match.teamName,
                     team2Logo: match.teamLogo
                 }
-            }else{
-                match.teams = {
+                : {
                     team1: match.teamName,
                     team1Logo: match.teamLogo,
-                    team2 : "Μπαρμπούτια",
+                    team2: "Μπαρμπούτια",
                     team2Logo: ourLogo
-                }
-            }
-            return match
-        })
+                };
+
+            matchObj.placeLink = court ? court.link : null;
+            return matchObj;
+        }));
         next()
     }catch(err) {
         console.error(err)
@@ -121,6 +126,7 @@ export const getCompletedMatches = async (req, res, next) => {
                     team2Score: match.homeTeamScore
                 }
             }
+            match.score = match.homeTeamScore + " - " + match.awayTeamScore
             return match
         })
         next()

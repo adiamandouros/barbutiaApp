@@ -1,6 +1,6 @@
 import { PageScraper } from './PageScraper.mjs';
 import * as cheerio from 'cheerio';
-import { addFutureMatchToDB, addCompletedMatchToDB } from './model/matchModel.mjs'
+import { addFutureMatchToDB, addCompletedMatchToDB, getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB } from './model/matchModel.mjs'
 
 export const scrapeFutureMatches = async (req, res, next) => {
     const upcomingMatchesURL = "https://www.basketaki.com/teams/barboutia/schedule"
@@ -11,6 +11,7 @@ export const scrapeFutureMatches = async (req, res, next) => {
         await futurePageScraper.initialize()
         const data = await futurePageScraper.getData()
         const $ = data!=null ? await cheerio.load(data) : null
+        const currentNextMatch = await getNextMatchFromDB()
 
         //Basketaki td names are stupid.
         const matches = $("tbody tr").each((index, row) => {
@@ -34,7 +35,14 @@ export const scrapeFutureMatches = async (req, res, next) => {
             futureMatchesArray.push(match)
         })
 
+        const newNextMatch = await getCurrentNextMatchFromDB()
+        if (newNextMatch && (!currentNextMatch || (currentNextMatch.teamName !== newNextMatch.teamName || currentNextMatch.date.getTime() !== newNextMatch.date.getTime() || currentNextMatch.isHome !== newNextMatch.isHome || currentNextMatch.league !== newNextMatch.league))) {
+            // There is a new next match, update it in the NextMatch table
+            await updateNextMatchInDB(newNextMatch)
+        }
+        next()
         return futureMatchesArray;
+        
 
     }catch(err){
         console.error("No proper data fetch")
@@ -77,18 +85,13 @@ export const scrapeCompletedMatches = async (req, res, next) => {
             match.isHome = isHome
             match.place = place
             match.win = result ==='W' ? true : false;
-            if(isHome){
-                match.homeTeamScore = match.score[0]
-                match.awayTeamScore = match.score[1]
-            }else{
-                match.homeTeamScore = match.score[1]
-                match.awayTeamScore = match.score[0]
-            }
+            match.homeTeamScore = match.score[0]
+            match.awayTeamScore = match.score[1]
 
             addCompletedMatchToDB(match)
             matchHistoryArray.push(match)
         })
-        
+
         return matchHistoryArray;
 
     }catch(err){

@@ -9,7 +9,7 @@ class PageScraper {
         try{
             const response = await axios.get(this.url)
             this.data = response.data
-            console.log("GOT DATA!")
+            // console.log("GOT DATA!")
         }catch(error){
             console.error("Problem during data fetch!")
             console.error(error)

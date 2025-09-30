@@ -12,6 +12,8 @@ router.get("/", getNextMatch, async (req, res, next) => {
     next()
 }, scrapeFutureMatches, scrapeCompletedMatches)
 
+// router.get("/", scrapeFutureMatches, scrapeCompletedMatches)
+
 router.get("/roster", async (req,res) => {
     res.render("roster", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, roster:true})
 })

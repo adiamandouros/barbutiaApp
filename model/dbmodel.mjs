@@ -93,40 +93,39 @@ const Court = sequelize.define(
     }
 });
 
-FutureMatch.hasOne(Court, { foreignKey: 'place', targetKey: 'basketakiName' })
+const NextMatch = sequelize.define(
+    'NextMatch', {
+    teamName: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        primaryKey: true
+    },
+    teamLogo: {
+        type: DataTypes.TEXT,
+        allowNull: false
+    },
+    league: {
+        type:DataTypes.TEXT,
+        allowNull:false,
+        primaryKey: true
+    },
+    date: {
+        type: DataTypes.DATE
+    },
+    place: {
+        type: DataTypes.TEXT
+    },
+    isHome: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        primaryKey: true
+    }
+});
+
+FutureMatch.belongsTo(Court, { foreignKey: 'place', targetKey: 'basketakiName' })
+NextMatch.belongsTo(Court, { foreignKey: 'place', targetKey: 'basketakiName' })
 Court.hasMany(FutureMatch, { foreignKey: 'place', sourceKey: 'basketakiName' })
-
-// Match.beforeCreate(match => match.matchId = uuid())
-// // const Book = sequelize.define(
-// //     'Book', {
-// //     title: {
-// //         type: DataTypes.TEXT,
-// //         primaryKey: true,
-// //         unique: true
-// //     },
-// //     author: {
-// //         type: DataTypes.TEXT,
-// //         allowNull: false
-// //     },
-// // });
-
-// // const User = sequelize.define(
-// //     'User', {
-// //     name: {
-// //         type: DataTypes.TEXT,
-// //         primaryKey: true,
-// //     },
-// //     password: { type: DataTypes.TEXT },
-// // });
-
-// // const BookUser = sequelize.define('BookUser', {
-// //     comment: {
-// //         type: DataTypes.TEXT,
-// //     }
-// // });
-
-// // Book.belongsToMany(User, { through: BookUser })
-// // User.belongsToMany(Book, { through: BookUser })
+Court.hasMany(NextMatch, { foreignKey: 'place', sourceKey: 'basketakiName' })
 
 // try {
 //     await sequelize.createSchema('barbutia')
@@ -137,4 +136,4 @@ Court.hasMany(FutureMatch, { foreignKey: 'place', sourceKey: 'basketakiName' })
 // await sequelize.sync({ alter: true }); // recreate all tables in the database if they don't exist or if they don't match the model, otherwise do nothing
 await sequelize.sync();
 
-export { FutureMatch, CompletedMatch }
+export { FutureMatch, CompletedMatch, NextMatch, Court }
