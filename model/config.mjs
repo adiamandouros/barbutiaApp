@@ -10,7 +10,6 @@ const sequelize = new Sequelize(
     // },
     // storage: './data/barbutia.sqlite'
     // }
-
     process.env.DATABASE_URL,
     {
         dialect:'mysql',
