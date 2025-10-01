@@ -5,16 +5,16 @@ import sequelize from './config.mjs';
 const FutureMatch = sequelize.define(
     'FutureGames', {
     teamName: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(100),
         allowNull: false,
         primaryKey: true
     },
     teamLogo: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(100),
         allowNull: false
     },
     league: {
-        type:DataTypes.TEXT,
+        type:DataTypes.STRING(100),
         allowNull:false,
         primaryKey: true
     },
@@ -22,7 +22,7 @@ const FutureMatch = sequelize.define(
         type: DataTypes.DATE
     },
     place: {
-        type: DataTypes.TEXT
+        type: DataTypes.STRING(100)
     },
     isHome: {
         type: DataTypes.BOOLEAN,
@@ -34,16 +34,16 @@ const FutureMatch = sequelize.define(
 const CompletedMatch = sequelize.define(
     'CompletedGames', {
     teamName: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(100),
         allowNull: false,
         primaryKey: true
     },
     teamLogo: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(100),
         allowNull: false
     },
     league: {
-        type:DataTypes.TEXT,
+        type:DataTypes.STRING(100),
         allowNull:false
     },
     date: {
@@ -51,7 +51,7 @@ const CompletedMatch = sequelize.define(
         primaryKey: true
     },
     place: {
-        type: DataTypes.TEXT
+        type: DataTypes.STRING(100)
     },
     homeTeamScore: {
         type: DataTypes.TINYINT
@@ -67,28 +67,28 @@ const CompletedMatch = sequelize.define(
         allowNull: false
     },
     article: {
-        type: DataTypes.TEXT,  //link to article about the match
+        type: DataTypes.STRING(100),  //link to article about the match
     }
 });
 
 const Court = sequelize.define(
     'Courts', {
     basketakiName: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(100),
         allowNull: false,
         unique: true,
         primaryKey: true
     },
     link: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(100),
         allowNull: false
     },
     address: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(100),
         allowNull: false
     },
     googleMapsName: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(100),
         allowNull: false
     }
 });
@@ -96,16 +96,16 @@ const Court = sequelize.define(
 const NextMatch = sequelize.define(
     'NextMatch', {
     teamName: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(100),
         allowNull: false,
         primaryKey: true
     },
     teamLogo: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(100),
         allowNull: false
     },
     league: {
-        type:DataTypes.TEXT,
+        type:DataTypes.STRING(100),
         allowNull:false,
         primaryKey: true
     },
@@ -113,7 +113,7 @@ const NextMatch = sequelize.define(
         type: DataTypes.DATE
     },
     place: {
-        type: DataTypes.TEXT
+        type: DataTypes.STRING(100)
     },
     isHome: {
         type: DataTypes.BOOLEAN,
