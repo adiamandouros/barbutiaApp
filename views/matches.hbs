@@ -18,7 +18,7 @@
                 </span>
                 <p class="justify-content-around row matchDescription align-items-center p-0 m-0 fw-light">
                     <span class="col">{{this.league}}</span>
-                    <span class="col"><a href="https://www.google.com/maps/search/?api=1&query={{this.place}}">{{this.place}}</a></span>
+                    <span class="col"><a href={{this.placeLink}}>{{this.place}}</a></span>
                     <span class="col">{{this.date}}</span>
                 </p>
             </div>
@@ -38,7 +38,7 @@
                         <img src="{{this.teams.team1Logo}}" alt="team1 logo" class="teamlogo">
                         <span class="teamName fw-bold"> {{this.teams.team1}}</span>
                     </span>
-                    <span class="col-md col-lg-2 text-nowrap{{#if this.win}} text-success{{/if}}{{#unless this.win}} text-danger{{/unless}}">
+                    <span class="col-md col-lg-2 text-nowrap{{#if this.isWin}} text-success{{/if}}{{#unless this.isWin}} text-danger{{/unless}}">
                         {{this.score}}
                     </span>
                     <span class="col-md text-nowrap text-end text-md-start">
