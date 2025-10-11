@@ -44,7 +44,8 @@ const CompletedMatch = sequelize.define(
     },
     league: {
         type:DataTypes.STRING(100),
-        allowNull:false
+        allowNull:false,
+        primaryKey: true
     },
     date: {
         type: DataTypes.DATE,
@@ -64,7 +65,8 @@ const CompletedMatch = sequelize.define(
     },
     isHome: {
         type: DataTypes.BOOLEAN,
-        allowNull: false
+        allowNull: false,
+        primaryKey: true
     },
     article: {
         type: DataTypes.STRING(100),  //link to article about the match

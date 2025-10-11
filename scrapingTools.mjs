@@ -45,7 +45,7 @@ export const scrapeFutureMatches = async (req, res, next) => {
         
 
     }catch(err){
-        console.error("No proper data fetch")
+        console.error("ERROR DURING FUTURE MATCH SCRAPING AND DB INSERTION!!!")
         console.error(err)
         if (next) next(err);
 
@@ -95,7 +95,7 @@ export const scrapeCompletedMatches = async (req, res, next) => {
         return matchHistoryArray;
 
     }catch(err){
-        console.error("No proper data fetch")
+        console.error("ERROR DURING COMPLETED MATCH SCRAPING AND DB INSERTION!!!")
         console.error(err)
         if (next) next(err);
         return null;
@@ -113,4 +113,53 @@ function parseDMYHM(dateTimeStr) {
     const [day, month, year] = datePart.split('/').map(Number);
     const [hour, minute] = timePart.split(':').map(Number);
     return new Date(year, month - 1, day, hour, minute);
+}
+
+export const scrapeStandings = async (req, res, next) => {
+    const standingsURL = "https://www.basketaki.com/teams/barboutia/standings"
+    const standingsPageScraper= new PageScraper(standingsURL)
+    const standingsArray = []
+
+    try{
+        await standingsPageScraper.initialize()
+        const data = await standingsPageScraper.getData()
+        const $ = data!=null ? await cheerio.load(data) : null
+
+        //Basketaki td names are stupid.
+        const standings = $("tbody tr").each((index, row) => {
+            const team = {};
+
+            const position = $(row).find('td:nth-child(1)').text().trim()
+            const teamName = $(row).find('.team-meta__name').text().trim()
+            const teamLogo = $(row).find('.team-meta__logo a img').attr('src').trim()
+            const gamesPlayed = $(row).find('td:nth-child(3)').text().trim()
+            const wins = $(row).find('td:nth-child(4)').text().trim()
+            const losses = $(row).find('td:nth-child(5)').text().trim()
+            const pointsFor = $(row).find('td:nth-child(6)').text().trim()
+            const pointsAgainst = $(row).find('td:nth-child(7)').text().trim()
+            const pointsDiff = $(row).find('td:nth-child(8)').text().trim()
+            const points = $(row).find('td:nth-child(9)').text().trim()
+
+            team.position = position
+            team.teamName = teamName
+            team.teamLogo = teamLogo
+            team.gamesPlayed = gamesPlayed
+            team.wins = wins
+            team.losses = losses
+            team.pointsFor = pointsFor
+            team.pointsAgainst = pointsAgainst
+            team.pointsDiff = pointsDiff
+            team.points = points
+
+            standingsArray.push(team)
+        })
+
+        req.standingsArray = standingsArray
+        next()
+
+    }catch(err){
+        console.error("ERROR DURING STANDINGS SCRAPING AND DB INSERTION!!!")
+        console.error(err)
+        next(err)
+    }
 }

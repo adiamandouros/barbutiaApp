@@ -1,19 +1,22 @@
 import { FutureMatch, CompletedMatch, NextMatch } from './dbmodel.mjs'
 
 export async function addFutureMatchToDB(match) {
+    const transaction = await FutureMatch.sequelize.transaction()
     try {
         if (!match)
             throw new Error("No match given!")
 
-        let testMatch = await FutureMatch.findOne({ where: { teamName: match.teamName, isHome:match.isHome, league:match.league } })
+        let testMatch = await FutureMatch.findOne({ where: { teamName: match.teamName, isHome:match.isHome, league:match.league }, transaction })
 
         if (testMatch)
             // throw new Error("There is already a match with the same date!")
-            FutureMatch.update({ date: match.date, place: match.place }, { where: { teamName: match.teamName, isHome:match.isHome, league:match.league } })
+            await FutureMatch.update({ date: match.date, place: match.place }, { where: { teamName: match.teamName, isHome:match.isHome, league:match.league }, transaction })
         else
-            testMatch = await FutureMatch.create({ teamName: match.teamName, teamLogo: match.teamLogo, date: match.date, place: match.place, isHome: match.isHome, league: match.league })
+            testMatch = await FutureMatch.upsert({ teamName: match.teamName, teamLogo: match.teamLogo, date: match.date, place: match.place, isHome: match.isHome, league: match.league }, {transaction})
+        await transaction.commit()
         return testMatch
     } catch (error) {
+        await transaction.rollback()
         throw error
     }
 }
@@ -46,19 +49,35 @@ export async function getCurrentNextMatchFromDB() {
 }
 
 export async function addCompletedMatchToDB(match) {
+    const transaction = await FutureMatch.sequelize.transaction()
     try {
         if (!match)
             throw new Error("No match given!")
 
-        let testMatch = await CompletedMatch.findOne({ where: { date: match.date, teamName: match.teamName} })
+        let testMatch = await CompletedMatch.findOne({ where: { date: match.date, teamName: match.teamName, isHome: match.isHome}, transaction })
 
-        if (!testMatch)
-            // throw new Error("There is already a match with the same date!")
-            testMatch = await CompletedMatch.create({ teamName: match.teamName, teamLogo: match.teamLogo, league: match.league, date: match.date, place: match.place, homeTeamScore: match.homeTeamScore, awayTeamScore: match.awayTeamScore, isWin: match.win, isHome: match.isHome })
-        else
-            testMatch = await CompletedMatch.update({ article: match.article }, { where: { date: match.date, teamName: match.teamName } })    
+        if (!testMatch){
+            console.log("The match {}{}{} was not found in the database, inserting it.", match.teamName, match.date, match.isHome)
+            testMatch = await CompletedMatch.upsert({ teamName: match.teamName, teamLogo: match.teamLogo, league: match.league, date: match.date, place: match.place, homeTeamScore: match.homeTeamScore, awayTeamScore: match.awayTeamScore, isWin: match.win, isHome: match.isHome }, {transaction})
+            console.log(testMatch)
+        }else{
+            console.log("The match {}{}{} was found in the database, updating it.", match.teamName, match.date, match.isHome)
+            testMatch = await CompletedMatch.update({
+                teamName: match.teamName,
+                teamLogo: match.teamLogo,
+                league: match.league,
+                date: match.date,
+                place: match.place,
+                homeTeamScore: match.homeTeamScore,
+                awayTeamScore: match.awayTeamScore,
+                isWin: match.win,
+                isHome: match.isHome
+            }, { where: { date: match.date, teamName: match.teamName, isHome: match.isHome, league: match.league }, transaction })
+        }
+        await transaction.commit()
         return testMatch
     } catch (error) {
+        await transaction.rollback()
         throw error
     }
 }
@@ -73,31 +92,35 @@ export async function getAllCompletedMatchesFromDB() {
 }
 
 export async function cleanFutureMatches() {
+    const transaction = await FutureMatch.sequelize.transaction()
     try {
-        const futureMatches = await FutureMatch.destroy({ where: {}, truncate: true })
+        await FutureMatch.destroy({ where: {}, truncate: true }, {transaction})
+        await transaction.commit()
     }catch(error) {
+        await transaction.rollback()
         throw error
     }
 }
 
 export async function updateNextMatchInDB(match) {
+    const transaction = await NextMatch.sequelize.transaction()
     try {
         if (!match)
             throw new Error("No match given!")
 
         // Try to find the first row
-        let nextMatch = await NextMatch.findOne();
+        let nextMatch = await NextMatch.findOne({transaction});
 
         if (nextMatch) {
-            // Update the row with new data
-            await nextMatch.update({
+            await nextMatch.destroy()
+            nextMatch = await NextMatch.create({
                 teamName: match.teamName,
                 teamLogo: match.teamLogo,
                 date: match.date,
                 place: match.place,
                 isHome: match.isHome,
                 league: match.league
-            });
+            }, {transaction});
         } else {
             // Create the row if it doesn't exist
             nextMatch = await NextMatch.create({
@@ -107,11 +130,12 @@ export async function updateNextMatchInDB(match) {
                 place: match.place,
                 isHome: match.isHome,
                 league: match.league
-            });
+            }, {transaction});
         }
-
+        await transaction.commit()
         return nextMatch;
     } catch (error) {
+        await transaction.rollback()
         throw error;
     }
 }

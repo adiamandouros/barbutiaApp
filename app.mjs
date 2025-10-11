@@ -18,6 +18,11 @@ app.use((req, res) => {
     res.redirect("/")
 })
 
+app.use((err, req, res, next) => {
+    console.log(err.stack)
+    res.render("error", { message: err.message })
+})
+
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => console.log("App has started in port " + PORT))
