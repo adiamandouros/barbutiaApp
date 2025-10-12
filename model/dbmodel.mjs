@@ -124,6 +124,51 @@ const NextMatch = sequelize.define(
     }
 });
 
+const Standings = sequelize.define(
+    'Standings', {
+    position: {
+        type: DataTypes.TINYINT,
+        allowNull: false
+    },
+    teamName: {
+        type: DataTypes.STRING(100),
+        allowNull: false,
+        primaryKey: true
+    },
+    teamLogo: {
+        type: DataTypes.STRING(100),
+        allowNull: false
+    },
+    points: {
+        type: DataTypes.TINYINT,
+        allowNull: false
+    },
+    gamesPlayed: {
+        type: DataTypes.TINYINT,
+        allowNull: false
+    },
+    wins: {
+        type: DataTypes.TINYINT,
+        allowNull: false
+    },
+    losses: {
+        type: DataTypes.TINYINT,
+        allowNull: false
+    },
+    pointsFor: {
+        type: DataTypes.SMALLINT,
+        allowNull: false
+    },
+    pointsAgainst: {
+        type: DataTypes.SMALLINT,
+        allowNull: false
+    },
+    pointsDiff: {
+        type: DataTypes.SMALLINT,
+        allowNull: false
+    }
+});
+
 FutureMatch.belongsTo(Court, { foreignKey: 'place', targetKey: 'basketakiName' })
 NextMatch.belongsTo(Court, { foreignKey: 'place', targetKey: 'basketakiName' })
 Court.hasMany(FutureMatch, { foreignKey: 'place', sourceKey: 'basketakiName' })
@@ -138,4 +183,4 @@ Court.hasMany(NextMatch, { foreignKey: 'place', sourceKey: 'basketakiName' })
 // await sequelize.sync({ alter: true }); // recreate all tables in the database if they don't exist or if they don't match the model, otherwise do nothing
 await sequelize.sync();
 
-export { FutureMatch, CompletedMatch, NextMatch, Court }
+export { FutureMatch, CompletedMatch, NextMatch, Court, Standings }

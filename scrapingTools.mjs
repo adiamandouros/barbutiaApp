@@ -1,8 +1,14 @@
 import { PageScraper } from './PageScraper.mjs';
 import * as cheerio from 'cheerio';
-import { addFutureMatchToDB, addCompletedMatchToDB, getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB } from './model/matchModel.mjs'
+import { shouldUpdateFutureMatches, shouldUpdateCompletedMatches, shouldUpdateStandings } from './model/updateLimiter.mjs';
+import { getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB, updateAllCompletedMatchesInDB, updateAllFutureMatchesInDB, updateAllStandingsInDB } from './model/matchModel.mjs'
 
 export const scrapeFutureMatches = async (req, res, next) => {
+    if (!shouldUpdateFutureMatches()) {
+        console.log("Skipping future matches scraping due to update limiter.");
+        if (next) next();
+        return null;
+    }
     const upcomingMatchesURL = "https://www.basketaki.com/teams/barboutia/schedule"
     const futurePageScraper= new PageScraper(upcomingMatchesURL)
     const futureMatchesArray = [] //not an object, to cooperate with handlebars
@@ -31,10 +37,12 @@ export const scrapeFutureMatches = async (req, res, next) => {
             match.teamLogo = teamLogo
             match.place = place
 
-            addFutureMatchToDB(match)
+            // addFutureMatchToDB(match)
             futureMatchesArray.push(match)
         })
-
+        await updateAllFutureMatchesInDB(futureMatchesArray)
+        
+        // Check if the next match has changed
         const newNextMatch = await getCurrentNextMatchFromDB()
         if (newNextMatch && (!currentNextMatch || (currentNextMatch.teamName !== newNextMatch.teamName || currentNextMatch.date.getTime() !== newNextMatch.date.getTime() || currentNextMatch.isHome !== newNextMatch.isHome || currentNextMatch.league !== newNextMatch.league))) {
             // There is a new next match, update it in the NextMatch table
@@ -54,6 +62,11 @@ export const scrapeFutureMatches = async (req, res, next) => {
 }
 
 export const scrapeCompletedMatches = async (req, res, next) => {
+    if (!shouldUpdateCompletedMatches()) {
+        console.log("Skipping completed matches scraping due to update limiter.");
+        if (next) next();
+        return null;
+    }
     const matchHistoryURL = "https://www.basketaki.com/teams/barboutia/results"
     const historyPageScraper= new PageScraper(matchHistoryURL)
     const matchHistoryArray = []
@@ -88,10 +101,11 @@ export const scrapeCompletedMatches = async (req, res, next) => {
             match.homeTeamScore = match.score[0]
             match.awayTeamScore = match.score[1]
 
-            addCompletedMatchToDB(match)
+            // addCompletedMatchToDB(match)
             matchHistoryArray.push(match)
         })
-
+        await updateAllCompletedMatchesInDB(matchHistoryArray)
+        if (next) next()
         return matchHistoryArray;
 
     }catch(err){
@@ -116,6 +130,11 @@ function parseDMYHM(dateTimeStr) {
 }
 
 export const scrapeStandings = async (req, res, next) => {
+    if (!shouldUpdateStandings()) {
+        console.log("Skipping standings scraping due to update limiter.");
+        // if (next) next();
+        return null;
+    }
     const standingsURL = "https://www.basketaki.com/teams/barboutia/standings"
     const standingsPageScraper= new PageScraper(standingsURL)
     const standingsArray = []
@@ -126,19 +145,20 @@ export const scrapeStandings = async (req, res, next) => {
         const $ = data!=null ? await cheerio.load(data) : null
 
         //Basketaki td names are stupid.
-        const standings = $("tbody tr").each((index, row) => {
+        const leagueTable = $("tbody").eq(1) //The second table is the league standings
+        const standings = $(leagueTable).find("tr").each((index, row) => {
             const team = {};
 
-            const position = $(row).find('td:nth-child(1)').text().trim()
+            const position = $(row).find('.team-standings__pos ').text().trim()
             const teamName = $(row).find('.team-meta__name').text().trim()
-            const teamLogo = $(row).find('.team-meta__logo a img').attr('src').trim()
-            const gamesPlayed = $(row).find('td:nth-child(3)').text().trim()
-            const wins = $(row).find('td:nth-child(4)').text().trim()
-            const losses = $(row).find('td:nth-child(5)').text().trim()
-            const pointsFor = $(row).find('td:nth-child(6)').text().trim()
-            const pointsAgainst = $(row).find('td:nth-child(7)').text().trim()
-            const pointsDiff = $(row).find('td:nth-child(8)').text().trim()
-            const points = $(row).find('td:nth-child(9)').text().trim()
+            const teamLogo = $(row).find('.team-meta__logo img').attr('src').trim()
+            const points = $(row).find('.team-standings__gb').eq(0).text().trim()
+            const gamesPlayed = $(row).find('.team-standings__gb').eq(1).text().trim()
+            const wins = $(row).find('.team-standings__win').text().trim()
+            const losses = $(row).find('.team-standings__lose').text().trim()
+            const pointsFor = $(row).find('.team-standings__home').text().trim()
+            const pointsAgainst = $(row).find('.team-standings__road').text().trim()
+            const pointsDiff = $(row).find('.team-standings__diff').text().trim()
 
             team.position = position
             team.teamName = teamName
@@ -152,10 +172,13 @@ export const scrapeStandings = async (req, res, next) => {
             team.points = points
 
             standingsArray.push(team)
+            // console.log(team)
         })
 
+        await updateAllStandingsInDB(standingsArray)
         req.standingsArray = standingsArray
-        next()
+        // if(next) next()
+        return null
 
     }catch(err){
         console.error("ERROR DURING STANDINGS SCRAPING AND DB INSERTION!!!")

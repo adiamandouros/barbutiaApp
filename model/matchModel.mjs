@@ -1,20 +1,19 @@
-import { FutureMatch, CompletedMatch, NextMatch } from './dbmodel.mjs'
+import { FutureMatch, CompletedMatch, NextMatch, Standings } from './dbmodel.mjs'
 
-export async function addFutureMatchToDB(match) {
+//Future Matches
+export async function updateAllFutureMatchesInDB(matchesArray) {
     const transaction = await FutureMatch.sequelize.transaction()
     try {
-        if (!match)
-            throw new Error("No match given!")
+        const futureMatches = await getAllCompletedMatchesFromDB()
 
-        let testMatch = await FutureMatch.findOne({ where: { teamName: match.teamName, isHome:match.isHome, league:match.league }, transaction })
+        if (futureMatches.length !== 0){
+            await cleanFutureMatches()
+        }
 
-        if (testMatch)
-            // throw new Error("There is already a match with the same date!")
-            await FutureMatch.update({ date: match.date, place: match.place }, { where: { teamName: match.teamName, isHome:match.isHome, league:match.league }, transaction })
-        else
-            testMatch = await FutureMatch.upsert({ teamName: match.teamName, teamLogo: match.teamLogo, date: match.date, place: match.place, isHome: match.isHome, league: match.league }, {transaction})
+        await FutureMatch.bulkCreate(matchesArray, { updateOnDuplicate:
+            ['teamLogo', 'date', 'place', 'isHome', 'league'] },
+            {transaction})
         await transaction.commit()
-        return testMatch
     } catch (error) {
         await transaction.rollback()
         throw error
@@ -30,6 +29,18 @@ export async function getAllFutureMatchesFromDB() {
     }
 }
 
+export async function cleanFutureMatches() {
+    const transaction = await FutureMatch.sequelize.transaction()
+    try {
+        await FutureMatch.destroy({ where: {}, truncate: true }, {transaction})
+        await transaction.commit()
+    }catch(error) {
+        await transaction.rollback()
+        throw error
+    }
+}
+
+//Next Match
 export async function getNextMatchFromDB() {
     try {
         const match = await NextMatch.findOne({ })
@@ -44,60 +55,6 @@ export async function getCurrentNextMatchFromDB() {
         const match = await FutureMatch.findOne({ order: [['date', 'ASC']] })
         return match
     } catch (error) {
-        throw error
-    }
-}
-
-export async function addCompletedMatchToDB(match) {
-    const transaction = await FutureMatch.sequelize.transaction()
-    try {
-        if (!match)
-            throw new Error("No match given!")
-
-        let testMatch = await CompletedMatch.findOne({ where: { date: match.date, teamName: match.teamName, isHome: match.isHome}, transaction })
-
-        if (!testMatch){
-            console.log("The match {}{}{} was not found in the database, inserting it.", match.teamName, match.date, match.isHome)
-            testMatch = await CompletedMatch.upsert({ teamName: match.teamName, teamLogo: match.teamLogo, league: match.league, date: match.date, place: match.place, homeTeamScore: match.homeTeamScore, awayTeamScore: match.awayTeamScore, isWin: match.win, isHome: match.isHome }, {transaction})
-            console.log(testMatch)
-        }else{
-            console.log("The match {}{}{} was found in the database, updating it.", match.teamName, match.date, match.isHome)
-            testMatch = await CompletedMatch.update({
-                teamName: match.teamName,
-                teamLogo: match.teamLogo,
-                league: match.league,
-                date: match.date,
-                place: match.place,
-                homeTeamScore: match.homeTeamScore,
-                awayTeamScore: match.awayTeamScore,
-                isWin: match.win,
-                isHome: match.isHome
-            }, { where: { date: match.date, teamName: match.teamName, isHome: match.isHome, league: match.league }, transaction })
-        }
-        await transaction.commit()
-        return testMatch
-    } catch (error) {
-        await transaction.rollback()
-        throw error
-    }
-}
-
-export async function getAllCompletedMatchesFromDB() {
-    try {
-        const matches = await CompletedMatch.findAll({order: [['date', 'DESC']]})
-        return matches
-    } catch (error) {
-        throw error
-    }
-}
-
-export async function cleanFutureMatches() {
-    const transaction = await FutureMatch.sequelize.transaction()
-    try {
-        await FutureMatch.destroy({ where: {}, truncate: true }, {transaction})
-        await transaction.commit()
-    }catch(error) {
-        await transaction.rollback()
         throw error
     }
 }
@@ -137,5 +94,51 @@ export async function updateNextMatchInDB(match) {
     } catch (error) {
         await transaction.rollback()
         throw error;
+    }
+}
+
+//Completed Matches
+export async function updateAllCompletedMatchesInDB(matchesArray) {
+    const transaction = await CompletedMatch.sequelize.transaction()
+    try {
+        await CompletedMatch.bulkCreate(matchesArray, { updateOnDuplicate:
+            ['teamLogo', 'date', 'place', 'isHome', 'league', 'article'] },
+            {transaction})
+        await transaction.commit()
+    } catch (error) {
+        await transaction.rollback()
+        throw error
+    }
+}
+
+export async function getAllCompletedMatchesFromDB() {
+    try {
+        const matches = await CompletedMatch.findAll({order: [['date', 'DESC']]})
+        return matches
+    } catch (error) {
+        throw error
+    }
+}
+
+//Standings
+export async function updateAllStandingsInDB(standingsArray) {
+    const transaction = await Standings.sequelize.transaction()
+    try {
+        await Standings.bulkCreate(standingsArray, { updateOnDuplicate:
+            [ 'position', 'points', 'gamesPlayed', 'wins', 'losses', 'pointsFor', 'pointsAgainst', 'pointsDiff' ] },
+            {transaction})
+        await transaction.commit()
+    } catch (error) {
+        await transaction.rollback()
+        throw error
+    }
+}
+
+export async function getAllStandingsFromDB() {
+    try {
+        const standings = await Standings.findAll({order: [['position', 'ASC']]})
+        return standings
+    } catch (error) {
+        throw error
     }
 }

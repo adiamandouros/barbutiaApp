@@ -1,4 +1,4 @@
-import { getAllFutureMatchesFromDB, getAllCompletedMatchesFromDB, getNextMatchFromDB, cleanFutureMatches } from "./matchModel.mjs";
+import { getAllFutureMatchesFromDB, getAllCompletedMatchesFromDB, getNextMatchFromDB, getAllStandingsFromDB } from "./matchModel.mjs";
 
 export const getNextMatch = async (req, res, next) => {
     try {
@@ -49,9 +49,6 @@ export const getNextMatch = async (req, res, next) => {
 export const getFutureMatches = async (req, res, next) => {
     try {
         const futureMatches = await getAllFutureMatchesFromDB()
-        if (futureMatches.length !== 0){
-            await cleanFutureMatches()
-        }
         const ourLogo = "/imgs/logo-transparent.png"
         req.futureMatches = await Promise.all(futureMatches.map(async match => {
             const court = await match.getCourt()
@@ -129,6 +126,17 @@ export const getCompletedMatches = async (req, res, next) => {
             match.score = match.homeTeamScore + " - " + match.awayTeamScore
             return match
         })
+        next()
+    }catch(err) {
+        console.error(err)
+        next(err)
+    }
+}
+
+export const getStandings = async (req, res, next) => {
+    try {
+        const standings = await getAllStandingsFromDB()
+        req.standingsTable = standings.map(s => s.toJSON())
         next()
     }catch(err) {
         console.error(err)

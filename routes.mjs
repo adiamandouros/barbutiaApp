@@ -1,7 +1,7 @@
 import express from 'express'
 import { PageSubtitle } from './pageSubtitle.mjs'
-import { scrapeFutureMatches, scrapeCompletedMatches } from './scrapingTools.mjs'
-import { getNextMatch, getFutureMatches, getCompletedMatches } from './model/matchController.mjs'
+import { scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings } from './scrapingTools.mjs'
+import { getNextMatch, getFutureMatches, getCompletedMatches, getStandings } from './model/matchController.mjs'
 
 const router = express.Router()
 const pageSubtitle= new PageSubtitle()
@@ -10,7 +10,7 @@ const scripts = [{script: 'js/yolk.js'}]
 router.get("/", getNextMatch, async (req, res, next) => {
     res.render("index", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, nextGame: req.nextGame, index:true})
     next()
-}, scrapeFutureMatches, scrapeCompletedMatches)
+}, scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings )
 
 // router.get("/", scrapeFutureMatches, scrapeCompletedMatches)
 
@@ -21,11 +21,12 @@ router.get("/roster", async (req,res) => {
 router.get("/matches", getFutureMatches, getCompletedMatches, async(req, res, next) => {
     res.render("matches", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, nextMatches: req.futureMatches, previousMatches:req.matchHistoryArray, matches:true})
     next()
-}, scrapeFutureMatches, scrapeCompletedMatches)
+}, scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings)
 
-router.get("/standings", (req, res) => {
-    res.render("standings", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, standings:true})
-})
+router.get("/standings", getStandings, (req, res, next) => {
+    res.render("standings", {subtitle: pageSubtitle.getSubtitle(), standingsTable: req.standingsTable, scripts: scripts, standings:true})
+    next()
+}, scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings)
 
 router.get("/synthimata", (req, res) => {
     res.render("synthimata", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, content:true})
