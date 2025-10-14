@@ -1,4 +1,4 @@
-import { getAllFutureMatchesFromDB, getAllCompletedMatchesFromDB, getNextMatchFromDB, getAllStandingsFromDB } from "./matchModel.mjs";
+import { getAllFutureMatchesFromDB, getAllCompletedMatchesFromDB, getNextMatchFromDB, getAllStandingsFromDB, getAllPlayersFromDB } from "./matchModel.mjs";
 
 export const getNextMatch = async (req, res, next) => {
     try {
@@ -137,6 +137,17 @@ export const getStandings = async (req, res, next) => {
     try {
         const standings = await getAllStandingsFromDB()
         req.standingsTable = standings.map(s => s.toJSON())
+        next()
+    }catch(err) {
+        console.error(err)
+        next(err)
+    }
+}
+
+export const getRoster = async (req, res, next) => {
+    try {
+        const roster = await getAllPlayersFromDB()
+        req.roster = roster.map(p => p.toJSON())
         next()
     }catch(err) {
         console.error(err)

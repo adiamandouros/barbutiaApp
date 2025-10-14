@@ -1,1 +1,78 @@
-roster
+{{#if players}}
+<div class="container-fluid main p-4">
+    <div class="row justify-content-center playerlist accordion">
+        {{#each players}}
+        <div class="card m-1 p-0 accordion-item accordion-header" id="2931">
+            <button class="row g-0 accordion-button collapsed p-0 focus-ring" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{this.jersey}}" aria-expanded="false" aria-controls="collapse{{this.jersey}}">
+                <div class="col-3">
+                    <div class="imageWrapper position-relative">
+                        <img class="top-0 start-0 img-fluid rounded" src="/imgs/players/resizedTrue/{{this.jersey}}.png" alt="{{this.jersey}}">
+                        <img class="hide position-absolute top-0 start-0 img-fluid rounded" src="/imgs/players/resized/{{this.jersey}}.jpg" alt="{{this.jersey}}">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card-body pe-0">
+                        <h5 class="card-title">{{this.jersey}}. {{this.surname}} </h5>   
+                        <h6 class="card-subtitle mb-2 text-muted">{{this.nickname}}</h6>
+                    </div>
+                </div>
+            </button>
+            <div id="collapse{{this.jersey}}" aria-labelledby="2931" class="accordion-collapse collapse">
+                <div class="accordion-body p-2">
+                    <div class="row p-2">
+                        <div class="col row generalStats col-sm-5 col-md-5">
+                            {{!-- <span class="col p-0 m-0">Ύψος: 1.84</span>
+                            <span class="col p-0 m-0">Θέση: guard</span> --}}
+                            <div class="col p-0 m-0 hstack gap-1">
+                                <span>2P: -%</span>
+                                <span class="ms-auto">3P: -%</span>
+                                <span class="ms-auto">FT: -%</span>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover table-dark align-middle mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th scope="col">Points</th>
+                                            <th scope="col">Assists</th>
+                                            <th scope="col">Reb.</th>
+                                            <th scope="col">Steals</th>
+                                            <th scope="col">Blocks</th>
+                                            <th scope="col">TO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+</div>
+{{/if}}
+{{#unless players}}
+    <div class="container-xxl main-element bg-dark main-card p-5 alert alert-danger">
+        <p>Δεν βρέθηκε το roster!</p>
+    </div>
+{{/unless}}

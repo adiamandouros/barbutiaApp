@@ -1,7 +1,7 @@
 import express from 'express'
 import { PageSubtitle } from './pageSubtitle.mjs'
 import { scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings } from './scrapingTools.mjs'
-import { getNextMatch, getFutureMatches, getCompletedMatches, getStandings } from './model/matchController.mjs'
+import { getNextMatch, getFutureMatches, getCompletedMatches, getStandings, getRoster } from './model/matchController.mjs'
 
 const router = express.Router()
 const pageSubtitle= new PageSubtitle()
@@ -14,8 +14,8 @@ router.get("/", getNextMatch, async (req, res, next) => {
 
 // router.get("/", scrapeFutureMatches, scrapeCompletedMatches)
 
-router.get("/roster", async (req,res) => {
-    res.render("roster", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, roster:true})
+router.get("/roster", getRoster, async (req,res) => {
+    res.render("roster", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, players: req.roster, roster:true})
 })
 
 router.get("/matches", getFutureMatches, getCompletedMatches, async(req, res, next) => {

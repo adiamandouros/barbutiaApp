@@ -37,7 +37,6 @@ export const scrapeFutureMatches = async (req, res, next) => {
             match.teamLogo = teamLogo
             match.place = place
 
-            // addFutureMatchToDB(match)
             futureMatchesArray.push(match)
         })
         await updateAllFutureMatchesInDB(futureMatchesArray)
@@ -97,11 +96,10 @@ export const scrapeCompletedMatches = async (req, res, next) => {
             match.score = score.split(' - ').map(s => s.trim())
             match.isHome = isHome
             match.place = place
-            match.win = result ==='W' ? true : false;
+            match.isWin = result ==='W' ? true : false;
             match.homeTeamScore = match.score[0]
             match.awayTeamScore = match.score[1]
 
-            // addCompletedMatchToDB(match)
             matchHistoryArray.push(match)
         })
         await updateAllCompletedMatchesInDB(matchHistoryArray)

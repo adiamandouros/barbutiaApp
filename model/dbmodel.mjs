@@ -33,10 +33,14 @@ const FutureMatch = sequelize.define(
 
 const CompletedMatch = sequelize.define(
     'CompletedGames', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
     teamName: {
         type: DataTypes.STRING(100),
-        allowNull: false,
-        primaryKey: true
+        allowNull: false
     },
     teamLogo: {
         type: DataTypes.STRING(100),
@@ -44,34 +48,28 @@ const CompletedMatch = sequelize.define(
     },
     league: {
         type:DataTypes.STRING(100),
-        allowNull:false,
-        primaryKey: true
+        allowNull:false
     },
-    date: {
+    date:{
         type: DataTypes.DATE,
-        primaryKey: true
+        allowNull: false
     },
-    place: {
-        type: DataTypes.STRING(100)
-    },
-    homeTeamScore: {
-        type: DataTypes.TINYINT
-    },
-    awayTeamScore: {
-        type: DataTypes.TINYINT
-    },
-    isWin: {
-        type: DataTypes.BOOLEAN,
-    },
+    place: DataTypes.STRING(100),
+    homeTeamScore: DataTypes.TINYINT,
+    awayTeamScore: DataTypes.TINYINT,
+    isWin: DataTypes.BOOLEAN,
     isHome: {
         type: DataTypes.BOOLEAN,
-        allowNull: false,
-        primaryKey: true
+        allowNull: false
     },
-    article: {
-        type: DataTypes.STRING(100),  //link to article about the match
+    article: DataTypes.STRING(100),
+    }, { indexes: [
+        {
+            unique: true,
+            fields: ['teamName', 'league', 'date', 'isHome']
+        }]
     }
-});
+);
 
 const Court = sequelize.define(
     'Courts', {
@@ -169,18 +167,156 @@ const Standings = sequelize.define(
     }
 });
 
+const Players = sequelize.define(
+    'Players', {
+    jersey: {
+        type: DataTypes.TINYINT,
+        allowNull: false
+    },
+    name: {
+        type: DataTypes.STRING(100),
+        allowNull: false
+    },
+    surname: {
+        type: DataTypes.STRING(100),
+        allowNull: false
+    },
+    basketakiName: {
+        type: DataTypes.STRING(100),
+        allowNull: false,
+        primaryKey: true
+    },
+    nickname: {
+        type: DataTypes.STRING(50),
+        allowNull: false
+    },
+    matches: {
+        type: DataTypes.TINYINT,
+        allowNull: false,
+        defaultValue: 0
+    },
+    mvpAwards: {
+        type: DataTypes.TINYINT,
+        allowNull: false,
+        defaultValue: 0
+    },
+    points: {
+        type: DataTypes.SMALLINT,
+        allowNull: false,
+        defaultValue: 0
+    },
+    pointsAvg: {
+        type: DataTypes.DECIMAL(4,2),
+        allowNull: false,
+        defaultValue: 0
+    },
+    rebounds: {
+        type: DataTypes.SMALLINT,
+        allowNull: false,
+        defaultValue: 0
+    },
+    reboundsAvg: {
+        type: DataTypes.DECIMAL(4,2),
+        allowNull: false,
+        defaultValue: 0
+    },
+    assists: {
+        type: DataTypes.SMALLINT,
+        allowNull: false,
+        defaultValue: 0
+    },
+    assistsAvg: {
+        type: DataTypes.DECIMAL(4,2),
+        allowNull: false,
+        defaultValue: 0
+    },
+    steals: {
+        type: DataTypes.SMALLINT,
+        allowNull: false,
+        defaultValue: 0
+    },
+    stealsAvg: {
+        type: DataTypes.DECIMAL(4,2),
+        allowNull: false,
+        defaultValue: 0
+    },
+    blocks: {
+        type: DataTypes.SMALLINT,
+        allowNull: false,
+        defaultValue: 0
+    },
+    blocksAvg: {
+        type: DataTypes.DECIMAL(4,2),
+        allowNull: false,
+        defaultValue: 0
+    },
+    turnovers: {
+        type: DataTypes.SMALLINT,
+        allowNull: false,
+        defaultValue: 0
+    },
+    turnoversAvg: {
+        type: DataTypes.DECIMAL(4,2),
+        allowNull: false,
+        defaultValue: 0
+    },
+    freeThrowsPercentage: {
+        type: DataTypes.DECIMAL(5,2),
+        allowNull: false,
+        defaultValue: 0
+    },
+    twoPointsPercentage: {
+        type: DataTypes.DECIMAL(5,2),
+        allowNull: false,
+        defaultValue: 0
+    },
+    threePointsPercentage: {
+        type: DataTypes.DECIMAL(5,2),
+        allowNull: false,
+        defaultValue: 0
+    }
+});
+
+const PlayerStats = sequelize.define('PlayerStats', {
+  points: {
+    type: DataTypes.SMALLINT,
+    allowNull: false,
+    defaultValue: 0
+  },
+  rebounds: {
+    type: DataTypes.SMALLINT,
+    allowNull: false,
+    defaultValue: 0
+  },
+  assists: {
+    type: DataTypes.SMALLINT,
+    allowNull: false,
+    defaultValue: 0
+  },
+  freeThrowsPercentage: {
+    type: DataTypes.DECIMAL(5,2),
+    allowNull: false,
+    defaultValue: 0
+  },
+  twoPointsPercentage: {
+    type: DataTypes.DECIMAL(5,2),
+    allowNull: false,
+    defaultValue: 0
+  },
+  threePointsPercentage: {
+    type: DataTypes.DECIMAL(5,2),
+    allowNull: false,
+    defaultValue: 0
+  }
+});
+
 FutureMatch.belongsTo(Court, { foreignKey: 'place', targetKey: 'basketakiName' })
 NextMatch.belongsTo(Court, { foreignKey: 'place', targetKey: 'basketakiName' })
 Court.hasMany(FutureMatch, { foreignKey: 'place', sourceKey: 'basketakiName' })
 Court.hasMany(NextMatch, { foreignKey: 'place', sourceKey: 'basketakiName' })
+Players.belongsToMany(CompletedMatch, { through: PlayerStats });
+CompletedMatch.belongsToMany(Players, { through: PlayerStats });
 
-// try {
-//     await sequelize.createSchema('barbutia')
-// }
-// catch(error) {
-//     console.log(error.message)
-// }
-// await sequelize.sync({ alter: true }); // recreate all tables in the database if they don't exist or if they don't match the model, otherwise do nothing
 await sequelize.sync();
 
-export { FutureMatch, CompletedMatch, NextMatch, Court, Standings }
+export { FutureMatch, CompletedMatch, NextMatch, Court, Standings, Players, PlayerStats }

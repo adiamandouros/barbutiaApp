@@ -1,4 +1,4 @@
-import { FutureMatch, CompletedMatch, NextMatch, Standings } from './dbmodel.mjs'
+import { FutureMatch, CompletedMatch, NextMatch, Standings, Players } from './dbmodel.mjs'
 
 //Future Matches
 export async function updateAllFutureMatchesInDB(matchesArray) {
@@ -102,7 +102,7 @@ export async function updateAllCompletedMatchesInDB(matchesArray) {
     const transaction = await CompletedMatch.sequelize.transaction()
     try {
         await CompletedMatch.bulkCreate(matchesArray, { updateOnDuplicate:
-            ['teamLogo', 'date', 'place', 'isHome', 'league', 'article'] },
+            ['teamName', 'teamLogo', 'league', 'date', 'place', 'homeTeamScore', 'awayTeamScore', 'isWin', 'isHome', 'article'] },
             {transaction})
         await transaction.commit()
     } catch (error) {
@@ -138,6 +138,16 @@ export async function getAllStandingsFromDB() {
     try {
         const standings = await Standings.findAll({order: [['position', 'ASC']]})
         return standings
+    } catch (error) {
+        throw error
+    }
+}
+
+//Roster
+export async function getAllPlayersFromDB() {
+    try {
+        const players = await Players.findAll({order: [['jersey', 'ASC']]})
+        return players
     } catch (error) {
         throw error
     }
