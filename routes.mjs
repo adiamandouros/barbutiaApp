@@ -41,4 +41,29 @@ router.get("/videos", (req, res) => {
     res.render("videos", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, content:true})
 })
 
+//API routes for fetching data (if needed)
+router.get("/api/nextmatch", getNextMatch, (req, res) => {
+    res.json(req.nextGame)
+})
+
+router.get("/api/futurematches", getFutureMatches, (req, res) => {
+    res.json(req.futureMatches)
+})
+
+router.get("/api/completedmatches", getCompletedMatches, (req, res) => {
+    res.json(req.matchHistoryArray)
+})
+
+router.get("/api/standings", getStandings, (req, res) => {
+    res.json(req.standingsTable)
+})
+
+router.get("/api/roster", getRoster, (req,res) => {
+    res.json(req.roster)
+})
+
+router.get("/api/BAR", (req, res) => {
+    res.send("BUTIA")
+})
+
 export {router}
