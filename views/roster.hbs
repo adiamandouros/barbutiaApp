@@ -19,49 +19,47 @@
             </button>
             <div id="collapse{{this.jersey}}" aria-labelledby="2931" class="accordion-collapse collapse">
                 <div class="accordion-body p-2">
-                    <div class="row p-2">
-                        <div class="col row generalStats col-sm-5 col-md-5">
-                            {{!-- <span class="col p-0 m-0">Ύψος: 1.84</span>
-                            <span class="col p-0 m-0">Θέση: guard</span> --}}
-                            <div class="col p-0 m-0 hstack gap-1">
-                                <span class="ms-auto">2P: {{this.twoPointsPercentage}}%</span>
-                                <span class="ms-auto">3P: {{this.threePointsPercentage}}%</span>
-                                <span class="ms-auto">FT: {{this.freeThrowsPercentage}}%</span>
-                            </div>
+                    <div class="col row generalStats col-lg m-2 p-1">
+                        {{!-- <span class="col p-0 m-0">Ύψος: 1.84</span>
+                        <span class="col p-0 m-0">Θέση: guard</span> --}}
+                        <div class="col p-0 m-0 hstack gap-1 justify-content-evenly">
+                            <span class="text-center text-nowrap">2 Points: {{this.twoPointsPercentage}}%</span>
+                            <span class="text-center text-nowrap">3 Points: {{this.threePointsPercentage}}%</span>
+                            <span class="text-center text-nowrap">Free Throws: {{this.freeThrowsPercentage}}%</span>
                         </div>
-                        <div class="col">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-hover table-dark align-middle mb-0">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th scope="col">Points</th>
-                                            <th scope="col">Assists</th>
-                                            <th scope="col">Reb.</th>
-                                            <th scope="col">Steals</th>
-                                            <th scope="col">Blocks</th>
-                                            <th scope="col">TO</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>{{this.points}}</td>
-                                            <td>{{this.assists}}</td>
-                                            <td>{{this.rebounds}}</td>
-                                            <td>{{this.steals}}</td>
-                                            <td>{{this.blocks}}</td>
-                                            <td>{{this.turnovers}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>{{this.pointsAvg}}</td>
-                                            <td>{{this.assistsAvg}}</td>
-                                            <td>{{this.reboundsAvg}}</td>
-                                            <td>{{this.stealsAvg}}</td>
-                                            <td>{{this.blocksAvg}}</td>
-                                            <td>{{this.turnoversAvg}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                    </div>
+                    <div class="col-lg p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover table-dark align-middle mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Points</th>
+                                        <th scope="col">Assists</th>
+                                        <th scope="col">Reb.</th>
+                                        <th scope="col">Steals</th>
+                                        <th scope="col">Blocks</th>
+                                        <th scope="col">TO</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{this.points}}</td>
+                                        <td>{{this.assists}}</td>
+                                        <td>{{this.rebounds}}</td>
+                                        <td>{{this.steals}}</td>
+                                        <td>{{this.blocks}}</td>
+                                        <td>{{this.turnovers}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{this.pointsAvg}}</td>
+                                        <td>{{this.assistsAvg}}</td>
+                                        <td>{{this.reboundsAvg}}</td>
+                                        <td>{{this.stealsAvg}}</td>
+                                        <td>{{this.blocksAvg}}</td>
+                                        <td>{{this.turnoversAvg}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
