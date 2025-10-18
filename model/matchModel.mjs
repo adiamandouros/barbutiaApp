@@ -152,3 +152,16 @@ export async function getAllPlayersFromDB() {
         throw error
     }
 }
+
+export async function updateAllPlayerStatsInDB(playerStats) {
+    const transaction = await Standings.sequelize.transaction()
+    try {
+        await Players.bulkCreate(playerStats, { updateOnDuplicate:
+            [ 'matches', 'mvpAwards', 'points', 'pointsAvg', 'rebounds', 'reboundsAvg', 'assists', 'assistsAvg', 'steals', 'stealsAvg', 'blocks', 'blocksAvg', 'turnovers', 'turnoversAvg', 'freeThrowsPercentage', 'twoPointsPercentage', 'threePointsPercentage' ] },
+            {transaction})
+        await transaction.commit()
+    } catch (error) {
+        await transaction.rollback()
+        throw error
+    }
+}

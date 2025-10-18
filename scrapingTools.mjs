@@ -1,7 +1,7 @@
 import { PageScraper } from './PageScraper.mjs';
 import * as cheerio from 'cheerio';
-import { shouldUpdateFutureMatches, shouldUpdateCompletedMatches, shouldUpdateStandings } from './model/updateLimiter.mjs';
-import { getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB, updateAllCompletedMatchesInDB, updateAllFutureMatchesInDB, updateAllStandingsInDB } from './model/matchModel.mjs'
+import { shouldUpdateFutureMatches, shouldUpdateCompletedMatches, shouldUpdateStandings, shouldUpdatePlayerStats } from './model/updateLimiter.mjs';
+import { getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB, updateAllCompletedMatchesInDB, updateAllFutureMatchesInDB, updateAllStandingsInDB, updateAllPlayerStatsInDB } from './model/matchModel.mjs'
 
 export const scrapeFutureMatches = async (req, res, next) => {
     if (!shouldUpdateFutureMatches()) {
@@ -130,7 +130,7 @@ function parseDMYHM(dateTimeStr) {
 export const scrapeStandings = async (req, res, next) => {
     if (!shouldUpdateStandings()) {
         console.log("Skipping standings scraping due to update limiter.");
-        // if (next) next();
+        if (next) next();
         return null;
     }
     const standingsURL = "https://www.basketaki.com/teams/barboutia/standings"
@@ -175,11 +175,83 @@ export const scrapeStandings = async (req, res, next) => {
 
         await updateAllStandingsInDB(standingsArray)
         req.standingsArray = standingsArray
-        // if(next) next()
+        if(next) next()
         return null
 
     }catch(err){
         console.error("ERROR DURING STANDINGS SCRAPING AND DB INSERTION!!!")
+        console.error(err)
+        next(err)
+    }
+}
+
+export const scrapePlayerStats = async (req, res, next) => {
+    if (!shouldUpdatePlayerStats()) {
+        console.log("Skipping playerStats scraping due to update limiter.");
+        // if (next) next();
+        return null;
+    }
+    const playerStatsURL = "https://www.basketaki.com/teams/barboutia/roster"
+    const playerStatsPageScraper= new PageScraper(playerStatsURL)
+    const playerStatsArray = []
+
+    try{
+        await playerStatsPageScraper.initialize()
+        const data = await playerStatsPageScraper.getData()
+        const $ = data!=null ? await cheerio.load(data) : null
+
+        const playersStats = {}
+        $('tbody').each((i, tbody) => {
+            $(tbody).find('tr').each((j, row) => {
+
+                const basketakiName = $(row).find('.team-roster-table__name a').text().trim()
+                if (!playersStats[basketakiName]) playersStats[basketakiName] = {}
+
+                playersStats[basketakiName].matches = (playersStats[basketakiName].matches || 0) + parseInt($(row).find('.team-roster-table__number').eq(0).text().trim())
+                playersStats[basketakiName].mvpAwards = (playersStats[basketakiName].mvpAwards || 0) + parseInt($(row).find('.team-roster-table__number').eq(1).text().trim())
+                playersStats[basketakiName].points = (playersStats[basketakiName].points || 0) + parseInt($(row).find('.team-roster-table__number').eq(4).text().trim())
+                playersStats[basketakiName].rebounds = (playersStats[basketakiName].rebounds || 0) + parseInt($(row).find('.team-roster-table__number').eq(8).text().trim())
+                playersStats[basketakiName].assists = (playersStats[basketakiName].assists || 0) + parseInt($(row).find('.team-roster-table__number').eq(12).text().trim())
+                playersStats[basketakiName].steals = (playersStats[basketakiName].steals || 0) + parseInt($(row).find('.team-roster-table__number').eq(14).text().trim())
+                playersStats[basketakiName].blocks = (playersStats[basketakiName].blocks || 0) + parseInt($(row).find('.team-roster-table__number').eq(18).text().trim())
+                playersStats[basketakiName].turnovers = (playersStats[basketakiName].turnovers || 0) + parseInt($(row).find('.team-roster-table__number').eq(16).text().trim())
+
+                playersStats[basketakiName].freeThrowsMade = (playersStats[basketakiName].freeThrowsMade || 0) + parseInt($(row).find('.team-roster-table__number').eq(20).text().trim().split('/')[0])
+                playersStats[basketakiName].freeThrowsAttempted = (playersStats[basketakiName].freeThrowsAttempted || 0) + parseInt($(row).find('.team-roster-table__number').eq(20).text().trim().split('/')[1])
+                playersStats[basketakiName].twoPointsMade = (playersStats[basketakiName].twoPointsMade || 0) + parseInt($(row).find('.team-roster-table__number').eq(22).text().trim().split('/')[0])
+                playersStats[basketakiName].twoPointsAttempted = (playersStats[basketakiName].twoPointsAttempted || 0) + parseInt($(row).find('.team-roster-table__number').eq(22).text().trim().split('/')[1])
+                playersStats[basketakiName].threePointsMade = (playersStats[basketakiName].threePointsMade || 0) + parseInt($(row).find('.team-roster-table__number').eq(24).text().trim().split('/')[0])
+                playersStats[basketakiName].threePointsAttempted = (playersStats[basketakiName].threePointsAttempted || 0) + parseInt($(row).find('.team-roster-table__number').eq(24).text().trim().split('/')[1])
+            });
+        });
+
+        const playerStatsArray = [];
+        for(const player in playersStats){
+            const stats = playersStats[player];
+            stats.matches = stats.matches >0 ? stats.matches-2 : 0; //Subtract 2 matches due to Meracles elimination
+            stats.freeThrowsPercentage = stats.freeThrowsAttempted > 0 ? ((stats.freeThrowsMade / stats.freeThrowsAttempted) * 100).toFixed(2) : '0.00';
+            stats.twoPointsPercentage = stats.twoPointsAttempted > 0 ? ((stats.twoPointsMade / stats.twoPointsAttempted) * 100).toFixed(2) : '0.00';
+            stats.threePointsPercentage = stats.threePointsAttempted > 0 ? ((stats.threePointsMade / stats.threePointsAttempted) * 100).toFixed(2) : '0.00';
+
+            stats.pointsAvg = stats.matches > 0 ? (stats.points / stats.matches).toFixed(2) : '0.00';
+            stats.reboundsAvg = stats.matches > 0 ? (stats.rebounds / stats.matches).toFixed(2) : '0.00';
+            stats.assistsAvg = stats.matches > 0 ? (stats.assists / stats.matches).toFixed(2) : '0.00';
+            stats.stealsAvg = stats.matches > 0 ? (stats.steals / stats.matches).toFixed(2) : '0.00';
+            stats.blocksAvg = stats.matches > 0 ? (stats.blocks / stats.matches).toFixed(2) : '0.00';
+            stats.turnoversAvg = stats.matches > 0 ? (stats.turnovers / stats.matches).toFixed(2) : '0.00';
+
+            playerStatsArray.push({
+                basketakiName: player,
+                ...stats
+            });
+        }
+
+        // console.log(playerStatsArray);
+        await updateAllPlayerStatsInDB(playerStatsArray);
+        // if(next) next()
+        return null
+    }catch(err){
+        console.error("ERROR DURING PLAYER STATS SCRAPING AND DB INSERTION!!!")
         console.error(err)
         next(err)
     }

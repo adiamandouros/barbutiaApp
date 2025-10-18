@@ -171,15 +171,18 @@ const Players = sequelize.define(
     'Players', {
     jersey: {
         type: DataTypes.TINYINT,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     },
     name: {
         type: DataTypes.STRING(100),
-        allowNull: false
+        allowNull: false,
+        defaultValue: 'Δήμος'
     },
     surname: {
         type: DataTypes.STRING(100),
-        allowNull: false
+        allowNull: false,
+        defaultValue: 'Κουτσόγεωργας'
     },
     basketakiName: {
         type: DataTypes.STRING(100),
@@ -188,7 +191,8 @@ const Players = sequelize.define(
     },
     nickname: {
         type: DataTypes.STRING(50),
-        allowNull: false
+        allowNull: false,
+        defaultValue: 'legend'
     },
     matches: {
         type: DataTypes.TINYINT,

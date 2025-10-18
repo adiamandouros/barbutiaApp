@@ -24,9 +24,9 @@
                             {{!-- <span class="col p-0 m-0">Ύψος: 1.84</span>
                             <span class="col p-0 m-0">Θέση: guard</span> --}}
                             <div class="col p-0 m-0 hstack gap-1">
-                                <span>2P: -%</span>
-                                <span class="ms-auto">3P: -%</span>
-                                <span class="ms-auto">FT: -%</span>
+                                <span class="ms-auto">2P: {{this.twoPointsPercentage}}%</span>
+                                <span class="ms-auto">3P: {{this.threePointsPercentage}}%</span>
+                                <span class="ms-auto">FT: {{this.freeThrowsPercentage}}%</span>
                             </div>
                         </div>
                         <div class="col">
@@ -44,20 +44,20 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>0</td>
-                                            <td>0</td>
-                                            <td>0</td>
-                                            <td>0</td>
-                                            <td>0</td>
-                                            <td>0</td>
+                                            <td>{{this.points}}</td>
+                                            <td>{{this.assists}}</td>
+                                            <td>{{this.rebounds}}</td>
+                                            <td>{{this.steals}}</td>
+                                            <td>{{this.blocks}}</td>
+                                            <td>{{this.turnovers}}</td>
                                         </tr>
                                         <tr>
-                                            <td>0</td>
-                                            <td>0</td>
-                                            <td>0</td>
-                                            <td>0</td>
-                                            <td>0</td>
-                                            <td>0</td>
+                                            <td>{{this.pointsAvg}}</td>
+                                            <td>{{this.assistsAvg}}</td>
+                                            <td>{{this.reboundsAvg}}</td>
+                                            <td>{{this.stealsAvg}}</td>
+                                            <td>{{this.blocksAvg}}</td>
+                                            <td>{{this.turnoversAvg}}</td>
                                         </tr>
                                     </tbody>
                                 </table>
