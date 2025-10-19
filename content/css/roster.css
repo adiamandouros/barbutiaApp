@@ -1,19 +1,8 @@
 img {
     transition: transform 3.8s cubic-bezier(0.19,1,.22,1);
 }
-.card {
-    max-width: 35em !important;
-    border: 0 !important;
-}
-.accordion-item{
-    border: 0 !important;
-}
-.card img{
-    max-height:100%;
-}
 .card:hover img{
     transform: scale(1.1);
-    /* color:orange; */
 }
 .hide{
     transition: transform 3.8s cubic-bezier(0.19,1,.22,1), opacity 1s ease-in;
@@ -23,8 +12,4 @@ img {
 }
 .accordion-button{
     border-radius: var(--bs-accordion-border-radius) !important;
-}
-.generalStats > *{
-    white-space: nowrap;
-    font-size: 1em;
 }

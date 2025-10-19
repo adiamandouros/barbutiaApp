@@ -1,4 +1,5 @@
-import { FutureMatch, CompletedMatch, NextMatch, Standings, Players } from './dbmodel.mjs'
+import { FutureMatch, CompletedMatch, NextMatch} from './dbmodel.mjs'
+import { Op } from 'sequelize';
 
 //Future Matches
 export async function updateAllFutureMatchesInDB(matchesArray) {
@@ -120,48 +121,13 @@ export async function getAllCompletedMatchesFromDB() {
     }
 }
 
-//Standings
-export async function updateAllStandingsInDB(standingsArray) {
-    const transaction = await Standings.sequelize.transaction()
+export async function searchCompletedMatchesInDB(searchTerm) {
     try {
-        await Standings.bulkCreate(standingsArray, { updateOnDuplicate:
-            [ 'position', 'points', 'gamesPlayed', 'wins', 'losses', 'pointsFor', 'pointsAgainst', 'pointsDiff' ] },
-            {transaction})
-        await transaction.commit()
+        const matches = await CompletedMatch.findAll({
+            where: { teamName: { [Op.like]: `%${searchTerm}%`}}
+        })
+        return matches
     } catch (error) {
-        await transaction.rollback()
-        throw error
-    }
-}
-
-export async function getAllStandingsFromDB() {
-    try {
-        const standings = await Standings.findAll({order: [['position', 'ASC']]})
-        return standings
-    } catch (error) {
-        throw error
-    }
-}
-
-//Roster
-export async function getAllPlayersFromDB() {
-    try {
-        const players = await Players.findAll({order: [['jersey', 'ASC']]})
-        return players
-    } catch (error) {
-        throw error
-    }
-}
-
-export async function updateAllPlayerStatsInDB(playerStats) {
-    const transaction = await Standings.sequelize.transaction()
-    try {
-        await Players.bulkCreate(playerStats, { updateOnDuplicate:
-            [ 'matches', 'mvpAwards', 'points', 'pointsAvg', 'rebounds', 'reboundsAvg', 'assists', 'assistsAvg', 'steals', 'stealsAvg', 'blocks', 'blocksAvg', 'turnovers', 'turnoversAvg', 'freeThrowsPercentage', 'twoPointsPercentage', 'threePointsPercentage' ] },
-            {transaction})
-        await transaction.commit()
-    } catch (error) {
-        await transaction.rollback()
         throw error
     }
 }

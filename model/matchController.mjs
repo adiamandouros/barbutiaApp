@@ -1,4 +1,4 @@
-import { getAllFutureMatchesFromDB, getAllCompletedMatchesFromDB, getNextMatchFromDB, getAllStandingsFromDB, getAllPlayersFromDB } from "./matchModel.mjs";
+import { getAllFutureMatchesFromDB, getAllCompletedMatchesFromDB, getNextMatchFromDB, searchCompletedMatchesInDB } from "./matchModel.mjs";
 
 export const getNextMatch = async (req, res, next) => {
     try {
@@ -92,40 +92,7 @@ export const getCompletedMatches = async (req, res, next) => {
     try {
         const completedMatchesResponse = await getAllCompletedMatchesFromDB()
         const completedMatches = completedMatchesResponse.map(match => match.toJSON())
-        const ourLogo = "/imgs/logo-transparent.png"
-        req.matchHistoryArray = completedMatches.map(match => {
-            // console.log(match)
-            const date = new Date(match.date)
-            match.date = new Intl.DateTimeFormat('el-GR', { 
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            }).format(date)
-            if (match.isHome){
-                match.teams = {
-                    team1: "Μπαρμπούτια",
-                    team1Logo: ourLogo,
-                    team2 : match.teamName,
-                    team2Logo: match.teamLogo,
-                    team1Score: match.homeTeamScore,
-                    team2Score: match.awayTeamScore
-                }
-            }else{
-                match.teams = {
-                    team1: match.teamName,
-                    team1Logo: match.teamLogo,
-                    team2 : "Μπαρμπούτια",
-                    team2Logo: ourLogo,
-                    team1Score: match.awayTeamScore,
-                    team2Score: match.homeTeamScore
-                }
-            }
-            match.score = match.homeTeamScore + " - " + match.awayTeamScore
-            return match
-        })
+        req.matchHistoryArray = completedMatches.map(match => massageCompletedMatchData(match))
         next()
     }catch(err) {
         console.error(err)
@@ -133,24 +100,45 @@ export const getCompletedMatches = async (req, res, next) => {
     }
 }
 
-export const getStandings = async (req, res, next) => {
-    try {
-        const standings = await getAllStandingsFromDB()
-        req.standingsTable = standings.map(s => s.toJSON())
-        next()
-    }catch(err) {
+export const searchMatches = async (req, res) => {
+    try{
+        const foundMatches = await searchCompletedMatchesInDB(req.query.search)
+        req.foundMatches = foundMatches.map(match => massageCompletedMatchData(match.toJSON()))
+    }catch(err){
         console.error(err)
-        next(err)
     }
 }
 
-export const getRoster = async (req, res, next) => {
-    try {
-        const roster = await getAllPlayersFromDB()
-        req.roster = roster.map(p => p.toJSON())
-        next()
-    }catch(err) {
-        console.error(err)
-        next(err)
+function massageCompletedMatchData(match) {
+    const ourLogo = "/imgs/logo-transparent.png"
+    const date = new Date(match.date)
+    match.date = new Intl.DateTimeFormat('el-GR', { 
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    }).format(date)
+    if (match.isHome){
+        match.teams = {
+            team1: "Μπαρμπούτια",
+            team1Logo: ourLogo,
+            team2 : match.teamName,
+            team2Logo: match.teamLogo,
+            team1Score: match.homeTeamScore,
+            team2Score: match.awayTeamScore
+        }
+    }else{
+        match.teams = {
+            team1: match.teamName,
+            team1Logo: match.teamLogo,
+            team2 : "Μπαρμπούτια",
+            team2Logo: ourLogo,
+            team1Score: match.awayTeamScore,
+            team2Score: match.homeTeamScore
+        }
     }
+    match.score = match.homeTeamScore + " - " + match.awayTeamScore
+    return match
 }

@@ -1,11 +1,44 @@
 import express from 'express'
 import { PageSubtitle } from './pageSubtitle.mjs'
 import { scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats } from './scrapingTools.mjs'
-import { getNextMatch, getFutureMatches, getCompletedMatches, getStandings, getRoster } from './model/matchController.mjs'
+import { getNextMatch, getFutureMatches, getCompletedMatches, searchMatches } from './model/matchController.mjs'
+import { getStandings } from './model/standingsController.mjs'
+import { getRoster, searchPlayers } from './model/playersController.mjs'
 
 const router = express.Router()
 const pageSubtitle= new PageSubtitle()
 const scripts = [{script: 'js/yolk.js'}]
+
+router.use((req, res, next) => {
+    if (req.query.search) {
+        console.log(`Intercepted search param: ${req.query.search}`);
+        
+        Promise.all([
+            searchMatches(req, res),
+            searchPlayers(req, res)
+        ]).then(() => {
+            req.searchResults = 0;
+            //Log found players
+            console.log(`Found ${req.foundPlayers.length} players matching search term.`);
+            console.log(`Found ${req.foundMatches.length} matches matching search term.`);
+
+            if (req.foundPlayers.length > 0 || req.foundMatches.length > 0) req.searchResults = 1;
+            return res.render("search", { subtitle: pageSubtitle.getSubtitle(), scripts: scripts, searchResults: req.searchResults, foundPlayers: req.foundPlayers, foundMatches: req.foundMatches });
+        }).catch(err => {
+            console.error(err);
+            next(err)
+        });
+
+        // console.log("Rendering search results page...");
+        // console.log(`Results found: ${req.searchResults}`);
+        // console.log(`Players found: ${req.foundPlayers}`);
+        // console.log(`Matches found: ${req.foundMatches}`);
+        //Safe
+        
+    }
+    
+    next();
+})
 
 router.get("/", getNextMatch, async (req, res, next) => {
     res.render("index", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, nextGame: req.nextGame, index:true})

@@ -2,69 +2,7 @@
 <div class="container-fluid main p-4">
     <div class="row justify-content-center playerlist accordion">
         {{#each players}}
-        <div class="card m-1 p-0 accordion-item accordion-header" id="2931">
-            <button class="row g-0 accordion-button collapsed p-0 focus-ring" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{this.jersey}}" aria-expanded="false" aria-controls="collapse{{this.jersey}}">
-                <div class="col-3">
-                    <div class="imageWrapper position-relative">
-                        <img class="top-0 start-0 img-fluid rounded" src="/imgs/players/resizedTrue/{{this.jersey}}.png" alt="{{this.jersey}}" onerror="this.src='/imgs/placeholder.png'">
-                        <img class="hide position-absolute top-0 start-0 img-fluid rounded" src="/imgs/players/resized/{{this.jersey}}.jpg" alt="{{this.jersey}}" onerror="this.src='/imgs/placeholder.png'">
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card-body pe-0">
-                        <h5 class="card-title">{{this.jersey}}. {{this.surname}} </h5>   
-                        <h6 class="card-subtitle mb-2 text-muted">{{this.nickname}}</h6>
-                    </div>
-                </div>
-            </button>
-            <div id="collapse{{this.jersey}}" aria-labelledby="2931" class="accordion-collapse collapse">
-                <div class="accordion-body p-2">
-                    <div class="col row generalStats col-lg m-2 p-1">
-                        {{!-- <span class="col p-0 m-0">Ύψος: 1.84</span>
-                        <span class="col p-0 m-0">Θέση: guard</span> --}}
-                        <div class="col p-0 m-0 hstack gap-1 justify-content-evenly">
-                            <span class="text-center text-nowrap">2P: {{this.twoPointsPercentage}}%</span>
-                            <span class="text-center text-nowrap">3P: {{this.threePointsPercentage}}%</span>
-                            <span class="text-center text-nowrap">FT: {{this.freeThrowsPercentage}}%</span>
-                        </div>
-                    </div>
-                    <div class="col-lg p-0">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-hover table-dark align-middle mb-0">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th scope="col">Points</th>
-                                        <th scope="col">Assists</th>
-                                        <th scope="col">Reb.</th>
-                                        <th scope="col">Steals</th>
-                                        <th scope="col">Blocks</th>
-                                        <th scope="col">TO</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{{this.points}}</td>
-                                        <td>{{this.assists}}</td>
-                                        <td>{{this.rebounds}}</td>
-                                        <td>{{this.steals}}</td>
-                                        <td>{{this.blocks}}</td>
-                                        <td>{{this.turnovers}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{this.pointsAvg}}</td>
-                                        <td>{{this.assistsAvg}}</td>
-                                        <td>{{this.reboundsAvg}}</td>
-                                        <td>{{this.stealsAvg}}</td>
-                                        <td>{{this.blocksAvg}}</td>
-                                        <td>{{this.turnoversAvg}}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            {{>playerCard this}}
         {{/each}}
     </div>
 </div>

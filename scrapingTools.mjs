@@ -1,7 +1,10 @@
 import { PageScraper } from './PageScraper.mjs';
 import * as cheerio from 'cheerio';
 import { shouldUpdateFutureMatches, shouldUpdateCompletedMatches, shouldUpdateStandings, shouldUpdatePlayerStats } from './model/updateLimiter.mjs';
-import { getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB, updateAllCompletedMatchesInDB, updateAllFutureMatchesInDB, updateAllStandingsInDB, updateAllPlayerStatsInDB } from './model/matchModel.mjs'
+import { getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB, updateAllCompletedMatchesInDB, updateAllFutureMatchesInDB } from './model/matchModel.mjs'
+import { updateAllStandingsInDB } from './model/standingsModel.mjs';
+import { updateAllPlayerStatsInDB } from './model/playersModel.mjs';
+
 
 export const scrapeFutureMatches = async (req, res, next) => {
     if (!shouldUpdateFutureMatches()) {

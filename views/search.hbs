@@ -1,0 +1,32 @@
+<div class="container-fluid main">
+{{#if searchResults}}
+    <div class="container-xxl main-element bg-dark main-card my-1 py-2">
+        <h2 class="text-center align-middle my-1 p-0">Αποτελέσματα</h2>
+    </div>
+
+    {{#if foundPlayers}}
+    <div class="container-xxl main-element bg-light main-card my-1 py-2 text-start text-primary">
+        Παίκτες:
+    </div>
+    <div class="row justify-content-center playerlist accordion">
+        {{#each foundPlayers}}
+            {{>playerCard player=this}}
+        {{/each}}
+    </div>
+    {{/if}}
+
+    {{#if foundMatches}}
+    <div class="container-xxl main-element bg-light main-card my-1 py-2 text-start text-primary">
+        Αγώνες:
+    </div>
+        {{#each foundMatches}}
+            {{>completedMatch match=this}}
+        {{/each}}
+    {{/if}}
+{{/if}}
+{{#unless searchResults}}
+    <div class="container-xxl main-element bg-dark main-card my-1 py-2">
+        <h2 class="text-center align-middle my-1 p-0">Δεν βρέθηκαν αποτελέσματα!</h2>
+    </div>
+{{/unless}}
+</div>
