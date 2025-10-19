@@ -28,16 +28,8 @@ router.use((req, res, next) => {
             console.error(err);
             next(err)
         });
-
-        // console.log("Rendering search results page...");
-        // console.log(`Results found: ${req.searchResults}`);
-        // console.log(`Players found: ${req.foundPlayers}`);
-        // console.log(`Matches found: ${req.foundMatches}`);
-        //Safe
-        
     }
-    
-    next();
+    else next();
 })
 
 router.get("/", getNextMatch, async (req, res, next) => {
