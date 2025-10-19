@@ -7,7 +7,8 @@ export async function searchForPlayersInDB(searchTerm) {
             where: {
                 [Op.or]: [
                     { name: {[Op.like]: `%${searchTerm}%` }},
-                    { surname: {[Op.like]: `%${searchTerm}%` }}
+                    { surname: {[Op.like]: `%${searchTerm}%` }},
+                    { nickname: {[Op.like]: `%${searchTerm}%` }}
                 ]
             }})
         

@@ -3,6 +3,7 @@ img {
 }
 .card:hover img{
     transform: scale(1.1);
+    /* color:orange; */
 }
 .hide{
     transition: transform 3.8s cubic-bezier(0.19,1,.22,1), opacity 1s ease-in;
