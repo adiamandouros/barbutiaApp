@@ -4,19 +4,19 @@ export const getNextMatch = async (req, res, next) => {
     try {
         const nextMatch = await getNextMatchFromDB()
         const court = await nextMatch.getCourt()
-        // req.nextMatch = nextMatch ? nextMatch.toJSON() : null
         const ourTeam = "Μπαρμπούτια"
         const ourLogo = "/imgs/logo-transparent.png"
-        req.nextGame = []
+        const nextGame = []
+        // req.nextGame = []
         if(nextMatch.isHome){
-            req.nextGame.teams = {
+            nextGame.teams = {
                 team1: ourTeam,
                 team1Logo: ourLogo,
                 team2: nextMatch.teamName,
                 team2Logo: nextMatch.teamLogo
             }
         }else{
-            req.nextGame.teams = {
+            nextGame.teams = {
                 team1: nextMatch.teamName,
                 team1Logo: nextMatch.teamLogo,
                 team2: ourTeam,
@@ -24,13 +24,13 @@ export const getNextMatch = async (req, res, next) => {
             }
         }
         
-        req.nextGame.place = nextMatch.place
-        req.nextGame.isHome = nextMatch.isHome
-        req.nextGame.league = nextMatch.league
-        req.nextGame.placeLink = court.link
+        nextGame.place = nextMatch.place
+        nextGame.isHome = nextMatch.isHome
+        nextGame.league = nextMatch.league
+        nextGame.placeLink = court.link
 
         const date = new Date(nextMatch.date)
-        req.nextGame.date = new Intl.DateTimeFormat('el-GR', { 
+        nextGame.date = new Intl.DateTimeFormat('el-GR', { 
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -38,11 +38,16 @@ export const getNextMatch = async (req, res, next) => {
             minute: '2-digit',
             hour12: false
         }).format(date)
-        req.nextGame.push(1) //So handlebars will know the array is not []
-        next()
+        
+        if (next){
+            req.nextGame = nextGame
+            req.nextGame.push(1) //So handlebars will know the array is not []
+            next()
+        }
+        return nextGame
     }catch(err) {
         console.error(err)
-        next(err)
+        if (next) next(err)
     }
 }
 

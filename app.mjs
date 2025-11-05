@@ -2,6 +2,8 @@ import express from 'express'
 import path from 'path'
 import { engine } from 'express-handlebars'
 import { router } from './routes.mjs'
+import { BarBotE } from './tools/BarBotE.mjs'
+import { getNextMatch } from './model/matchController.mjs'
 
 const app = express()
 
@@ -34,13 +36,11 @@ app.use((err, req, res, next) => {
     res.render("error", { message: err.message })
 })
 
+const barBot = new BarBotE()
+
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => console.log("App has started in port " + PORT))
-
-
-
-
 
 // Example: Express static file config
 app.use('/assets', express.static('public/assets', {

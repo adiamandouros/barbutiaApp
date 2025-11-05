@@ -1,6 +1,6 @@
 import express from 'express'
-import { PageSubtitle } from './pageSubtitle.mjs'
-import { scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats } from './scrapingTools.mjs'
+import { PageSubtitle } from './tools/pageSubtitle.mjs'
+import { scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats } from './tools/scraping/scrapingTools.mjs'
 import { getNextMatch, getFutureMatches, getCompletedMatches, searchMatches } from './model/matchController.mjs'
 import { getStandings } from './model/standingsController.mjs'
 import { getRoster, searchPlayers } from './model/playersController.mjs'
@@ -68,7 +68,7 @@ router.get("/videos", (req, res) => {
 
 //API routes for fetching data (if needed)
 router.get("/api/nextmatch", getNextMatch, (req, res) => {
-    res.json(req.nextGame)
+    res.json(req.nextGame.toJSON())
 })
 
 router.get("/api/futurematches", getFutureMatches, (req, res) => {
@@ -87,7 +87,7 @@ router.get("/api/roster", getRoster, (req,res) => {
     res.json(req.roster)
 })
 
-router.get("/api/BAR", (req, res) => {
+router.get("/api/BAR", scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, (req, res) => {
     res.send("BUTIA")
 })
 

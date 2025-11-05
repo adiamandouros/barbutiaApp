@@ -1,9 +1,9 @@
 import { PageScraper } from './PageScraper.mjs';
 import * as cheerio from 'cheerio';
-import { shouldUpdateFutureMatches, shouldUpdateCompletedMatches, shouldUpdateStandings, shouldUpdatePlayerStats } from './model/updateLimiter.mjs';
-import { getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB, updateAllCompletedMatchesInDB, updateAllFutureMatchesInDB } from './model/matchModel.mjs'
-import { updateAllStandingsInDB } from './model/standingsModel.mjs';
-import { updateAllPlayerStatsInDB } from './model/playersModel.mjs';
+import { shouldUpdateFutureMatches, shouldUpdateCompletedMatches, shouldUpdateStandings, shouldUpdatePlayerStats } from '../../model/updateLimiter.mjs';
+import { getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB, updateAllCompletedMatchesInDB, updateAllFutureMatchesInDB } from '../../model/matchModel.mjs'
+import { updateAllStandingsInDB } from '../../model/standingsModel.mjs';
+import { updateAllPlayerStatsInDB } from '../../model/playersModel.mjs';
 
 
 export const scrapeFutureMatches = async (req, res, next) => {
@@ -31,6 +31,7 @@ export const scrapeFutureMatches = async (req, res, next) => {
             const date = $(row).find('td:nth-child(2)').text().trim()
             if(date==="-") return //Skip matches without a date
             const place = $(row).find('.team-result__assists').text().trim()
+            if(place==="kleisto") return //Skip matches with no set court
             const league = $(row).find('.team-result__points').text().trim()
             const isHome = $(row).find('.team-result__status').text().trim()==="Home" ? true : false
             match.date = parseDMYHM(date)
