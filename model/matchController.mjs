@@ -31,9 +31,9 @@ export const getNextMatch = async (req, res, next) => {
 
         const date = new Date(nextMatch.date)
         nextGame.date = new Intl.DateTimeFormat('el-GR', { 
+            weekday: 'long',
             day: '2-digit',
             month: '2-digit',
-            year: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
             hour12: false
