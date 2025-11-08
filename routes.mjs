@@ -68,7 +68,10 @@ router.get("/videos", (req, res) => {
 
 //API routes for fetching data (if needed)
 router.get("/api/nextmatch", getNextMatch, (req, res) => {
-    res.json(req.nextGame.toJSON())
+    const next = Array.isArray(req.nextGame) ? Object.assign({}, req.nextGame) : req.nextGame;
+    // remove numeric indices if you don't want them:
+    delete next[0];
+    res.json(next);
 })
 
 router.get("/api/futurematches", getFutureMatches, (req, res) => {
@@ -87,7 +90,7 @@ router.get("/api/roster", getRoster, (req,res) => {
     res.json(req.roster)
 })
 
-router.get("/api/BAR", scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, (req, res) => {
+router.get("/api/BAR", scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats, (req, res) => {
     res.send("BUTIA")
 })
 

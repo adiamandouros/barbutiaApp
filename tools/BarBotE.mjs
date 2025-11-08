@@ -17,6 +17,8 @@ export class BarBotE {
         'Κακό σκυlink'
     ]
 
+    matchesChannelId = '1429525987485286593'
+
     constructor() {
         // Discord Bot Setup
         this.client = new Client({ 
@@ -35,44 +37,41 @@ export class BarBotE {
         this.client.on('messageCreate', async message => { 
 
             // Ignore messages from bots 
-            if (message.author.bot) return; 
+            if (message.author.bot) return
+
+            if (message.channelId !== this.matchesChannelId) return
 
             // Respond to a specific message 
             if (message.content.toLowerCase() === 'bar') {
 
-                message.reply('BUTIA! 💜 🖤'); 
-                const nextGame = await getNextMatch()
-                
-                // const nextGame = {
-                //     date: 'Παρασκευή 4/9/1987 14:00',
-                //     place: 'Κλειστό Γυμναστήριο Μπαρμπούτια',
-                //     placeLink: 'https://goo.gl/maps/example'
-                // }
+                message.reply('BUTIA! 💜 🖤')
 
-                message.channel.send(
-`💜 *ΕΠΟΜΕΝΟΣ ΑΓΩΝΑΣ* 🖤
-        
-${nextGame.date}
-        
-${nextGame.place}
-        
-${nextGame.placeLink}
-
-${this.linkText[Math.floor(Math.random()*this.linkText.length)]}:
-TBA`);
-    ;
-    
+                this.postNextMatch(message.channelId)
             } 
         });
     }
 
-    postMessage(channelId, message) {
-        const channel = this.client.channels.cache.get(channelId);
+    async postNextMatch(channelId) {
+        const actualChannelId = (channelId != null) ? channelId : this.matchesChannelId;
+        const channel = this.client.channels.cache.get(actualChannelId)
         if (channel) {
-            channel.send(message);
+            const nextGame = await getNextMatch()
+            channel.send(
+                
+`💜 *ΕΠΟΜΕΝΟΣ ΑΓΩΝΑΣ* 🖤
+        
+📅 ${nextGame.date}
+        
+🏀 ${nextGame.place}
+        
+📍 ${nextGame.placeLink}
+
+▶️ ${this.linkText[Math.floor(Math.random()*this.linkText.length)]}:
+TBA`
+            )
+
         } else {
             console.error(`Channel with ID ${channelId} not found.`);
         }
     }
 }
-

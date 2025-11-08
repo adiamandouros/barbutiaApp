@@ -37,6 +37,7 @@ app.use((err, req, res, next) => {
 })
 
 const barBot = new BarBotE()
+export default barBot
 
 const PORT = process.env.PORT || 3000
 

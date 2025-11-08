@@ -4,6 +4,7 @@ import { shouldUpdateFutureMatches, shouldUpdateCompletedMatches, shouldUpdateSt
 import { getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB, updateAllCompletedMatchesInDB, updateAllFutureMatchesInDB } from '../../model/matchModel.mjs'
 import { updateAllStandingsInDB } from '../../model/standingsModel.mjs';
 import { updateAllPlayerStatsInDB } from '../../model/playersModel.mjs';
+import barBot from '../../app.mjs';
 
 
 export const scrapeFutureMatches = async (req, res, next) => {
@@ -50,6 +51,7 @@ export const scrapeFutureMatches = async (req, res, next) => {
         if (newNextMatch && (!currentNextMatch || (currentNextMatch.teamName !== newNextMatch.teamName || currentNextMatch.date.getTime() !== newNextMatch.date.getTime() || currentNextMatch.isHome !== newNextMatch.isHome || currentNextMatch.league !== newNextMatch.league))) {
             // There is a new next match, update it in the NextMatch table
             await updateNextMatchInDB(newNextMatch)
+            await barBot.postNextMatch()
         }
         next()
         return futureMatchesArray;
