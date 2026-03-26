@@ -176,13 +176,11 @@ const Players = sequelize.define(
     },
     name: {
         type: DataTypes.STRING(100),
-        allowNull: false,
-        defaultValue: 'Δήμος'
+        allowNull: false
     },
     surname: {
         type: DataTypes.STRING(100),
-        allowNull: false,
-        defaultValue: 'Κουτσόγεωργας'
+        allowNull: false
     },
     basketakiName: {
         type: DataTypes.STRING(100),
@@ -191,8 +189,7 @@ const Players = sequelize.define(
     },
     nickname: {
         type: DataTypes.STRING(50),
-        allowNull: false,
-        defaultValue: 'legend'
+        allowNull: false
     },
     matches: {
         type: DataTypes.TINYINT,
