@@ -14,7 +14,7 @@
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "cheerio": "^1.0.0",
-    "discord.js": "^14.23.2",
+    "discord.js": "^14.25.1",
     "dotenv": "^17.2.3",
     "express": "^4.21.1",
     "express-handlebars": "^8.0.1",
@@ -22,6 +22,9 @@
     "mysql2": "^3.15.1",
     "sequelize": "^6.37.7",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^6.0.1"
+  },
+  "overrides": {
+    "undici": "^6.24.0"
   }
 }
