@@ -39,11 +39,15 @@ class CalendarService {
         if (!this.initialized) await this.initialize();
     }
 
-    buildEvent(match) {
+    buildTitle(match) {
         const ourTeam = 'Μπαρμπούτια';
-        const title = match.isHome
+        return match.isHome
             ? `${ourTeam} vs ${match.teamName}`
             : `${match.teamName} vs ${ourTeam}`;
+    }
+
+    buildEvent(match) {
+        const title = this.buildTitle(match);
 
         const startStr = toLocalDateTimeString(match.date);
         const endStr = toLocalDateTimeString(new Date(match.date.getTime() + 2 * 60 * 60 * 1000));
@@ -92,6 +96,42 @@ class CalendarService {
             eventId
         });
         console.log(`Calendar: deleted event ${eventId}`);
+    }
+
+    // Returns the event data if it exists, or null if it has been deleted (404).
+    // Throws on any other error.
+    async getMatchEvent(eventId) {
+        await this.ensureInitialized();
+        try {
+            const response = await this.calendar.events.get({
+                calendarId: process.env.GOOGLE_CALENDAR_ID,
+                eventId
+            });
+            return response.data;
+        } catch (err) {
+            if (err.status === 404) return null;
+            throw err;
+        }
+    }
+
+    // Searches for an existing event with the exact same title within a narrow
+    // window around the match start time. Used to avoid creating duplicates.
+    async findExistingEvent(match) {
+        await this.ensureInitialized();
+        const title = this.buildTitle(match);
+        const timeMin = new Date(match.date.getTime() - 60 * 1000).toISOString();
+        const timeMax = new Date(match.date.getTime() + 60 * 1000).toISOString();
+
+        const response = await this.calendar.events.list({
+            calendarId: process.env.GOOGLE_CALENDAR_ID,
+            q: title,
+            timeMin,
+            timeMax,
+            singleEvents: true
+        });
+
+        const events = response.data.items || [];
+        return events.find(e => e.summary === title) || null;
     }
 }
 

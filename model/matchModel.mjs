@@ -16,6 +16,7 @@ export async function updateAllFutureMatchesInDB(matchesArray) {
         // Classify each incoming match and carry over the stored calendarEventId
         const newMatches = []
         const updatedMatches = []
+        const unchangedMatches = []
 
         for (const match of matchesArray) {
             const key = `${match.teamName}|${match.league}|${String(match.isHome)}`
@@ -26,7 +27,14 @@ export async function updateAllFutureMatchesInDB(matchesArray) {
                     const dateChanged = existing.date && match.date &&
                         existing.date.getTime() !== match.date.getTime()
                     const placeChanged = existing.place !== match.place
-                    if (dateChanged || placeChanged) updatedMatches.push(match)
+                    if (dateChanged || placeChanged) {
+                        updatedMatches.push(match)
+                    } else {
+                        unchangedMatches.push(match)
+                    }
+                } else {
+                    // Existed in DB but never got a calendar event (e.g. previous creation failed)
+                    newMatches.push(match)
                 }
                 existingMap.delete(key)
             } else {
@@ -48,7 +56,7 @@ export async function updateAllFutureMatchesInDB(matchesArray) {
         })
 
         await transaction.commit()
-        return { newMatches, updatedMatches, deletedEventIds }
+        return { newMatches, updatedMatches, unchangedMatches, deletedEventIds }
     } catch (error) {
         await transaction.rollback()
         throw error

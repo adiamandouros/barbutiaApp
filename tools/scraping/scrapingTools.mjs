@@ -8,29 +8,70 @@ import { updateAllPlayerStatsInDB } from '../../model/playersModel.mjs';
 import barBot from '../../app.mjs';
 
 
+// Checks for an existing duplicate event before creating a new one, then
+// creates it and persists the event ID to the DB.
+async function ensureCalendarEvent(match) {
+    const duplicate = await calendarService.findExistingEvent(match)
+    if (duplicate) {
+        console.log(`Calendar: reusing existing event ${duplicate.id} for ${match.teamName}`)
+        await saveFutureMatchCalendarEventId(match.teamName, match.league, match.isHome, duplicate.id)
+        return duplicate.id
+    }
+    const eventId = await calendarService.createMatchEvent(match)
+    await saveFutureMatchCalendarEventId(match.teamName, match.league, match.isHome, eventId)
+    return eventId
+}
+
 // Runs asynchronously after the DB update — errors are caught and logged so they
 // never propagate back to the request/response cycle or the DB transaction.
-async function syncCalendarEvents({ newMatches, updatedMatches, deletedEventIds }) {
+async function syncCalendarEvents({ newMatches, updatedMatches, unchangedMatches, deletedEventIds }) {
+    // New matches: check for a duplicate first, then create
     for (const match of newMatches) {
         try {
-            const eventId = await calendarService.createMatchEvent(match)
-            await saveFutureMatchCalendarEventId(match.teamName, match.league, match.isHome, eventId)
+            await ensureCalendarEvent(match)
         } catch (err) {
             console.error(`Calendar: failed to create event for ${match.teamName}:`, err.message)
         }
     }
+
+    // Updated matches: try to update; if the event was deleted (404) recreate it
     for (const match of updatedMatches) {
         try {
             await calendarService.updateMatchEvent(match.calendarEventId, match)
         } catch (err) {
-            console.error(`Calendar: failed to update event for ${match.teamName}:`, err.message)
+            if (err.status === 404) {
+                try {
+                    await ensureCalendarEvent(match)
+                } catch (innerErr) {
+                    console.error(`Calendar: failed to recreate event for ${match.teamName}:`, innerErr.message)
+                }
+            } else {
+                console.error(`Calendar: failed to update event for ${match.teamName}:`, err.message)
+            }
         }
     }
+
+    // Unchanged matches: verify the event still exists; recreate silently if deleted
+    for (const match of unchangedMatches) {
+        try {
+            const event = await calendarService.getMatchEvent(match.calendarEventId)
+            if (!event) {
+                console.log(`Calendar: event for ${match.teamName} was deleted, recreating`)
+                await ensureCalendarEvent(match)
+            }
+        } catch (err) {
+            console.error(`Calendar: failed to verify event for ${match.teamName}:`, err.message)
+        }
+    }
+
+    // Matches no longer in the schedule: delete their events (404 = already gone, ignore)
     for (const eventId of deletedEventIds) {
         try {
             await calendarService.deleteMatchEvent(eventId)
         } catch (err) {
-            console.error(`Calendar: failed to delete event ${eventId}:`, err.message)
+            if (err.status !== 404) {
+                console.error(`Calendar: failed to delete event ${eventId}:`, err.message)
+            }
         }
     }
 }
