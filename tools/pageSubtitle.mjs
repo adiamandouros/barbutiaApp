@@ -33,7 +33,9 @@ class PageSubtitle {
         'Μελτέμι resorts',
         'Ποιός; Ποιός;',
         'Καλά να είσαι Γιαννάκη',
-        'Nothing Thrives'
+        'Nothing Thrives',
+        'Εγώ μόνο με βρώμικους παίχτες τσακώνομαι',
+        'ΔΕΙΧ\' ΤΟΝΑ ΡΕ, ΔΕΙΧ\' ΤΟΝΑ'
     ]
 
     getSubtitle() {

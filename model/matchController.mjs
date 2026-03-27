@@ -53,8 +53,17 @@ export const getNextMatch = async (req, res, next) => {
 
 export const getFutureMatches = async (req, res, next) => {
     try {
-        const futureMatches = await getAllFutureMatchesFromDB()
-        const ourLogo = "/imgs/logo-transparent.png"
+        console.log('🔍 Getting future matches for display...');
+        const futureMatches = await getAllFutureMatchesFromDB();
+        
+        if (!futureMatches || futureMatches.length === 0) {
+            console.log('⚠️ No future matches found, setting empty array');
+            req.futureMatches = [];
+            next();
+            return;
+        }
+        
+        const ourLogo = "/imgs/logo-transparent.png";
         req.futureMatches = await Promise.all(futureMatches.map(async match => {
             const court = await match.getCourt()
             const matchObj = match.toJSON()
@@ -86,22 +95,39 @@ export const getFutureMatches = async (req, res, next) => {
             matchObj.placeLink = court ? court.link : null;
             return matchObj;
         }));
-        next()
+        console.log(`✅ Processed ${req.futureMatches.length} future matches for display`);
+        next();
     }catch(err) {
-        console.error(err)
-        next(err)
+        console.error('❌ Error in getFutureMatches:', err.message);
+        // Set empty array to prevent template errors
+        req.futureMatches = [];
+        // Don't crash the route - continue with empty data
+        next();
     }
 }
 
 export const getCompletedMatches = async (req, res, next) => {
     try {
-        const completedMatchesResponse = await getAllCompletedMatchesFromDB()
-        const completedMatches = completedMatchesResponse.map(match => match.toJSON())
-        req.matchHistoryArray = completedMatches.map(match => massageCompletedMatchData(match))
-        next()
+        console.log('🔍 Getting completed matches for display...');
+        const completedMatchesResponse = await getAllCompletedMatchesFromDB();
+        
+        if (!completedMatchesResponse || completedMatchesResponse.length === 0) {
+            console.log('⚠️ No completed matches found, setting empty array');
+            req.matchHistoryArray = [];
+            next();
+            return;
+        }
+        
+        const completedMatches = completedMatchesResponse.map(match => match.toJSON());
+        req.matchHistoryArray = completedMatches.map(match => massageCompletedMatchData(match));
+        console.log(`✅ Processed ${req.matchHistoryArray.length} completed matches for display`);
+        next();
     }catch(err) {
-        console.error(err)
-        next(err)
+        console.error('❌ Error in getCompletedMatches:', err.message);
+        // Set empty array to prevent template errors
+        req.matchHistoryArray = [];
+        // Don't crash the route - continue with empty data
+        next();
     }
 }
 

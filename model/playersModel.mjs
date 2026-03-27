@@ -56,7 +56,8 @@ export async function updateAllPlayerStatsInDB(playerStats) {
             return {
                 ...playerStat,
                 name: playerStat.name || parsedName.name,
-                surname: playerStat.surname || parsedName.surname
+                surname: playerStat.surname || parsedName.surname,
+                nickname: playerStat.nickname || ''
             };
         });
 
