@@ -28,6 +28,10 @@ const FutureMatch = sequelize.define(
         type: DataTypes.BOOLEAN,
         allowNull: false,
         primaryKey: true
+    },
+    calendarEventId: {
+        type: DataTypes.STRING(100),
+        allowNull: true
     }
 });
 

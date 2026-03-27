@@ -1,141 +1,97 @@
 import { google } from 'googleapis';
 import 'dotenv/config';
 
+// Formats a Date as a local-time string for Google Calendar.
+// Using toISOString() would give UTC ("Z"), causing the event to land at the
+// wrong wall-clock hour when combined with a timeZone field. Instead we emit
+// the local components so Google Calendar interprets them in Europe/Athens.
+function toLocalDateTimeString(date) {
+    const pad = n => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+           `T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
+}
+
 class CalendarService {
     constructor() {
         this.calendar = null;
         this.initialized = false;
-        this.oauth2Client = null;
     }
 
     async initialize() {
-        try {
-            // Use OAuth 2.0 with refresh token (works around organization policies)
-            this.oauth2Client = new google.auth.OAuth2(
-                process.env.GOOGLE_CLIENT_ID,
-                process.env.GOOGLE_CLIENT_SECRET,
-                'http://localhost:3000/auth/callback'
-            );
-
-            // Set the refresh token (you'll get this from initial OAuth flow)
-            this.oauth2Client.setCredentials({
-                refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-            });
-
-            this.calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
-            this.initialized = true;
-            console.log('✅ Google Calendar service initialized with OAuth 2.0');
-            return true;
-        } catch (error) {
-            console.error('❌ Failed to initialize Google Calendar service:', error.message);
-            return false;
+        const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN } = process.env;
+        if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REFRESH_TOKEN) {
+            throw new Error('Google Calendar credentials are not configured in environment variables.');
         }
+
+        const oauth2Client = new google.auth.OAuth2(
+            GOOGLE_CLIENT_ID,
+            GOOGLE_CLIENT_SECRET,
+            'urn:ietf:wg:oauth:2.0:oob'
+        );
+        oauth2Client.setCredentials({ refresh_token: GOOGLE_REFRESH_TOKEN });
+
+        this.calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+        this.initialized = true;
+        console.log('Calendar: service initialized.');
     }
 
-    async createMatchEvent(match) {
-        if (!this.initialized && !await this.initialize()) {
-            throw new Error('Calendar service not initialized');
-        }
-
-        try {
-            const event = this.formatMatchEvent(match);
-            
-            const response = await this.calendar.events.insert({
-                calendarId: process.env.GOOGLE_CALENDAR_ID,
-                resource: event
-            });
-
-            console.log(`✅ Created calendar event: ${response.data.id}`);
-            return response.data.id;
-        } catch (error) {
-            console.error('❌ Failed to create calendar event:', error.message);
-            throw error;
-        }
+    async ensureInitialized() {
+        if (!this.initialized) await this.initialize();
     }
 
-    async updateMatchEvent(eventId, match) {
-        if (!this.initialized && !await this.initialize()) {
-            throw new Error('Calendar service not initialized');
-        }
+    buildEvent(match) {
+        const ourTeam = 'Μπαρμπούτια';
+        const title = match.isHome
+            ? `${ourTeam} vs ${match.teamName}`
+            : `${match.teamName} vs ${ourTeam}`;
 
-        try {
-            const event = this.formatMatchEvent(match);
-            
-            const response = await this.calendar.events.update({
-                calendarId: process.env.GOOGLE_CALENDAR_ID,
-                eventId: eventId,
-                resource: event
-            });
+        const startStr = toLocalDateTimeString(match.date);
+        const endStr = toLocalDateTimeString(new Date(match.date.getTime() + 2 * 60 * 60 * 1000));
 
-            console.log(`✅ Updated calendar event: ${eventId}`);
-            return response.data.id;
-        } catch (error) {
-            console.error('❌ Failed to update calendar event:', error.message);
-            throw error;
-        }
-    }
-
-    async deleteMatchEvent(eventId) {
-        if (!this.initialized && !await this.initialize()) {
-            throw new Error('Calendar service not initialized');
-        }
-
-        try {
-            await this.calendar.events.delete({
-                calendarId: process.env.GOOGLE_CALENDAR_ID,
-                eventId: eventId
-            });
-
-            console.log(`✅ Deleted calendar event: ${eventId}`);
-            return true;
-        } catch (error) {
-            console.error('❌ Failed to delete calendar event:', error.message);
-            throw error;
-        }
-    }
-
-    formatMatchEvent(match) {
-        const ourTeam = "Μπαρμπούτια";
-        const opponent = match.teamName;
-        
-        // Determine match title based on home/away
-        const title = match.isHome 
-            ? `🏀 ${ourTeam} vs ${opponent}` 
-            : `🏀 ${opponent} vs ${ourTeam}`;
-
-        // Format event for Google Calendar
-        const event = {
+        return {
             summary: title,
             location: match.place,
-            description: `
-🏀 **${match.league}**
-${match.isHome ? '🏠 Home Game' : '✈️ Away Game'}
-
-**Opponent:** ${opponent}
-**Venue:** ${match.place}
-**League:** ${match.league}
-
-Go Μπαρμπούτια! 💜🖤
-            `.trim(),
-            start: {
-                dateTime: match.date.toISOString(),
-                timeZone: 'Europe/Athens'
-            },
-            end: {
-                dateTime: new Date(match.date.getTime() + 2 * 60 * 60 * 1000).toISOString(), // +2 hours
-                timeZone: 'Europe/Athens'
-            },
-            colorId: match.isHome ? '10' : '8', // Green for home, Gray for away
+            description: `${match.league}\n${match.isHome ? 'Εντός έδρας' : 'Εκτός έδρας'}\nΑντίπαλος: ${match.teamName}`,
+            start: { dateTime: startStr, timeZone: 'Europe/Athens' },
+            end:   { dateTime: endStr,   timeZone: 'Europe/Athens' },
+            colorId: '3',
             reminders: {
                 useDefault: false,
                 overrides: [
-                    { method: 'popup', minutes: 60 }, // 1 hour before
-                    { method: 'popup', minutes: 15 }  // 15 minutes before
+                    { method: 'popup', minutes: 60 },
+                    { method: 'popup', minutes: 15 }
                 ]
             }
         };
+    }
 
-        return event;
+    async createMatchEvent(match) {
+        await this.ensureInitialized();
+        const response = await this.calendar.events.insert({
+            calendarId: process.env.GOOGLE_CALENDAR_ID,
+            resource: this.buildEvent(match)
+        });
+        console.log(`Calendar: created event ${response.data.id} for ${match.teamName}`);
+        return response.data.id;
+    }
+
+    async updateMatchEvent(eventId, match) {
+        await this.ensureInitialized();
+        await this.calendar.events.update({
+            calendarId: process.env.GOOGLE_CALENDAR_ID,
+            eventId,
+            resource: this.buildEvent(match)
+        });
+        console.log(`Calendar: updated event ${eventId} for ${match.teamName}`);
+    }
+
+    async deleteMatchEvent(eventId) {
+        await this.ensureInitialized();
+        await this.calendar.events.delete({
+            calendarId: process.env.GOOGLE_CALENDAR_ID,
+            eventId
+        });
+        console.log(`Calendar: deleted event ${eventId}`);
     }
 }
 

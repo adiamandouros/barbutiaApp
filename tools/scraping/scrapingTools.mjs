@@ -1,11 +1,39 @@
 import { PageScraper } from './PageScraper.mjs';
 import * as cheerio from 'cheerio';
 import { shouldUpdateFutureMatches, shouldUpdateCompletedMatches, shouldUpdateStandings, shouldUpdatePlayerStats } from '../../model/updateLimiter.mjs';
-import { getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB, updateAllCompletedMatchesInDB, updateAllFutureMatchesInDB } from '../../model/matchModel.mjs'
+import { getNextMatchFromDB, getCurrentNextMatchFromDB, updateNextMatchInDB, updateAllCompletedMatchesInDB, updateAllFutureMatchesInDB, saveFutureMatchCalendarEventId } from '../../model/matchModel.mjs'
+import calendarService from '../../model/calendarService.mjs'
 import { updateAllStandingsInDB } from '../../model/standingsModel.mjs';
 import { updateAllPlayerStatsInDB } from '../../model/playersModel.mjs';
 import barBot from '../../app.mjs';
 
+
+// Runs asynchronously after the DB update — errors are caught and logged so they
+// never propagate back to the request/response cycle or the DB transaction.
+async function syncCalendarEvents({ newMatches, updatedMatches, deletedEventIds }) {
+    for (const match of newMatches) {
+        try {
+            const eventId = await calendarService.createMatchEvent(match)
+            await saveFutureMatchCalendarEventId(match.teamName, match.league, match.isHome, eventId)
+        } catch (err) {
+            console.error(`Calendar: failed to create event for ${match.teamName}:`, err.message)
+        }
+    }
+    for (const match of updatedMatches) {
+        try {
+            await calendarService.updateMatchEvent(match.calendarEventId, match)
+        } catch (err) {
+            console.error(`Calendar: failed to update event for ${match.teamName}:`, err.message)
+        }
+    }
+    for (const eventId of deletedEventIds) {
+        try {
+            await calendarService.deleteMatchEvent(eventId)
+        } catch (err) {
+            console.error(`Calendar: failed to delete event ${eventId}:`, err.message)
+        }
+    }
+}
 
 export const scrapeFutureMatches = async (req, res, next) => {
     if (!shouldUpdateFutureMatches()) {
@@ -44,7 +72,11 @@ export const scrapeFutureMatches = async (req, res, next) => {
 
             futureMatchesArray.push(match)
         })
-        await updateAllFutureMatchesInDB(futureMatchesArray)
+        const calendarDiff = await updateAllFutureMatchesInDB(futureMatchesArray)
+        // Fire-and-forget: calendar sync runs independently after the DB is committed
+        syncCalendarEvents(calendarDiff).catch(err =>
+            console.error('Calendar sync failed unexpectedly:', err.message)
+        )
         
         // Check if the next match has changed
         const newNextMatch = await getCurrentNextMatchFromDB()
