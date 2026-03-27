@@ -1,5 +1,6 @@
 import express from 'express'
 import path from 'path'
+import compression from 'compression'
 import { engine } from 'express-handlebars'
 import { router } from './routes.mjs'
 import { BarBotE } from './tools/BarBotE.mjs'
@@ -7,20 +8,28 @@ import { getNextMatch } from './model/matchController.mjs'
 
 const app = express()
 
+app.use(compression())
+
 app.engine('hbs', engine({extname: ".hbs"}))
 app.set('view engine', 'hbs')
 
-app.use(express.static("content"))
+// Player images: 30 days, not immutable (photos may change between seasons)
+app.use('/imgs/players', express.static(path.join('content', 'imgs', 'players'), {
+    maxAge: '30d',
+    etag: true,
+    lastModified: true
+}))
 
-app.use(
-  '/content/imgs',
-  express.static(path.join('content', 'imgs'), {
-    maxAge: '1d',        // cache images for 1 day
-    etag: true,           // allow conditional GET (ETag header)
-    lastModified: true   // include Last-Modified header
-    // immutable: true       // tells browser “won’t change until filename does”
-  })
-)
+// Logo, backgrounds, and all other static images: 30 days, immutable
+app.use('/imgs', express.static(path.join('content', 'imgs'), {
+    maxAge: '30d',
+    immutable: true,
+    etag: true,
+    lastModified: true
+}))
+
+// Everything else in content (CSS, JS, favicons, etc.)
+app.use(express.static("content"))
 
 //middleware gia na diavazei to request body
 app.use(express.urlencoded({extended: false}))
@@ -42,10 +51,3 @@ export default barBot
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => console.log("App has started in port " + PORT))
-
-// Example: Express static file config
-app.use('/assets', express.static('public/assets', {
-  maxAge: '30d',         // Cache for 30 days
-  etag: true,            // Allow validation if the file changes
-  lastModified: true
-}));

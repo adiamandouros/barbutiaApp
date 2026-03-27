@@ -6,6 +6,7 @@ import calendarService from '../../model/calendarService.mjs'
 import { updateAllStandingsInDB } from '../../model/standingsModel.mjs';
 import { updateAllPlayerStatsInDB } from '../../model/playersModel.mjs';
 import barBot from '../../app.mjs';
+import { cache } from '../../model/cache.mjs';
 
 
 // Checks for an existing duplicate event before creating a new one, then
@@ -114,11 +115,13 @@ export const scrapeFutureMatches = async (req, res, next) => {
             futureMatchesArray.push(match)
         })
         const calendarDiff = await updateAllFutureMatchesInDB(futureMatchesArray)
+        cache.invalidate('futureMatches');
+        cache.invalidate('nextMatch');
         // Fire-and-forget: calendar sync runs independently after the DB is committed
         syncCalendarEvents(calendarDiff).catch(err =>
             console.error('Calendar sync failed unexpectedly:', err.message)
         )
-        
+
         // Check if the next match has changed
         const newNextMatch = await getCurrentNextMatchFromDB()
         if (newNextMatch && (!currentNextMatch || (currentNextMatch.teamName !== newNextMatch.teamName || currentNextMatch.date.getTime() !== newNextMatch.date.getTime() || currentNextMatch.isHome !== newNextMatch.isHome || currentNextMatch.league !== newNextMatch.league))) {
@@ -182,6 +185,7 @@ export const scrapeCompletedMatches = async (req, res, next) => {
             matchHistoryArray.push(match)
         })
         await updateAllCompletedMatchesInDB(matchHistoryArray)
+        cache.invalidate('completedMatches');
         if (next) next()
         return matchHistoryArray;
 
@@ -253,6 +257,7 @@ export const scrapeStandings = async (req, res, next) => {
         })
 
         await updateAllStandingsInDB(standingsArray)
+        cache.invalidate('standings');
         req.standingsArray = standingsArray
         if(next) next()
         return null
@@ -327,6 +332,7 @@ export const scrapePlayerStats = async (req, res, next) => {
 
         // console.log(playerStatsArray);
         await updateAllPlayerStatsInDB(playerStatsArray);
+        cache.invalidate('roster');
         // if(next) next()
         return null
     }catch(err){

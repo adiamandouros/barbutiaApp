@@ -8,6 +8,12 @@ const sequelize = new Sequelize(
     define: {
         timestamps: false,
         freezeTableName: true
+    },
+    pool: {
+        max: 10,   // max connections in pool
+        min: 2,    // keep 2 warm connections ready
+        acquire: 30000,
+        idle: 10000
     }
 });
 

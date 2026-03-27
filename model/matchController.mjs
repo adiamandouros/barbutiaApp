@@ -1,7 +1,15 @@
 import { getAllFutureMatchesFromDB, getAllCompletedMatchesFromDB, getNextMatchFromDB, searchCompletedMatchesInDB } from "./matchModel.mjs";
+import { cache } from "./cache.mjs";
 
 export const getNextMatch = async (req, res, next) => {
     try {
+        const cached = cache.get('nextMatch');
+        if (cached) {
+            req.nextGame = cached;
+            if (next) next();
+            return cached;
+        }
+
         const nextMatch = await getNextMatchFromDB()
         const court = await nextMatch.getCourt()
         const ourTeam = "Μπαρμπούτια"
@@ -42,6 +50,7 @@ export const getNextMatch = async (req, res, next) => {
         if (next){
             req.nextGame = nextGame
             req.nextGame.push(1) //So handlebars will know the array is not []
+            cache.set('nextMatch', req.nextGame);
             next()
         }
         return nextGame
@@ -53,6 +62,13 @@ export const getNextMatch = async (req, res, next) => {
 
 export const getFutureMatches = async (req, res, next) => {
     try {
+        const cached = cache.get('futureMatches');
+        if (cached) {
+            req.futureMatches = cached;
+            next();
+            return;
+        }
+
         console.log('🔍 Getting future matches for display...');
         const futureMatches = await getAllFutureMatchesFromDB();
         
@@ -96,6 +112,7 @@ export const getFutureMatches = async (req, res, next) => {
             return matchObj;
         }));
         console.log(`✅ Processed ${req.futureMatches.length} future matches for display`);
+        cache.set('futureMatches', req.futureMatches);
         next();
     }catch(err) {
         console.error('❌ Error in getFutureMatches:', err.message);
@@ -108,6 +125,13 @@ export const getFutureMatches = async (req, res, next) => {
 
 export const getCompletedMatches = async (req, res, next) => {
     try {
+        const cached = cache.get('completedMatches');
+        if (cached) {
+            req.matchHistoryArray = cached;
+            next();
+            return;
+        }
+
         console.log('🔍 Getting completed matches for display...');
         const completedMatchesResponse = await getAllCompletedMatchesFromDB();
         
@@ -121,6 +145,7 @@ export const getCompletedMatches = async (req, res, next) => {
         const completedMatches = completedMatchesResponse.map(match => match.toJSON());
         req.matchHistoryArray = completedMatches.map(match => massageCompletedMatchData(match));
         console.log(`✅ Processed ${req.matchHistoryArray.length} completed matches for display`);
+        cache.set('completedMatches', req.matchHistoryArray);
         next();
     }catch(err) {
         console.error('❌ Error in getCompletedMatches:', err.message);

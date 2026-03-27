@@ -1,9 +1,18 @@
 import {getAllPlayersFromDB, searchForPlayersInDB} from "./playersModel.mjs";
+import { cache } from "./cache.mjs";
 
 export const getRoster = async (req, res, next) => {
     try {
+        const cached = cache.get('roster');
+        if (cached) {
+            req.roster = cached;
+            next();
+            return;
+        }
+
         const roster = await getAllPlayersFromDB()
         req.roster = roster.map(p => p.toJSON())
+        cache.set('roster', req.roster);
         next()
     }catch(err) {
         console.error(err)
