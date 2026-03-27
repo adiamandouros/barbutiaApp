@@ -28,6 +28,22 @@ app.use('/imgs', express.static(path.join('content', 'imgs'), {
     lastModified: true
 }))
 
+// Font: 30 days, immutable (filename encodes variant; update filename if font changes)
+app.use('/fonts', express.static(path.join('content', 'fonts'), {
+    maxAge: '30d',
+    immutable: true,
+    etag: true,
+    lastModified: true
+}))
+
+// Sound effects: 30 days (not immutable - file contents could be swapped)
+app.use('/sounds', express.static(path.join('content', 'sounds'), {
+    maxAge: '30d',
+    etag: true,
+    lastModified: true,
+    immutable: true
+}))
+
 // Everything else in content (CSS, JS, favicons, etc.)
 app.use(express.static("content"))
 
