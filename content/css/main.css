@@ -83,8 +83,8 @@ h1{
     display: block;
     width: 1.5rem;
     height: 0.125rem;
-    background-color: var(--primary);
-    border: 0 solid var(--primary);
+    background-color: #666;
+    border: 0 solid #666;
     box-sizing: border-box;
     border-radius: 0;
     transition: height 0.4s ease, background-color 0.4s ease,
@@ -104,7 +104,7 @@ h1{
     height: 1.5rem;
     justify-self: center;
     align-self: center;
-    background-color: var(--primary);
+    background-color: #666;
     transform: scaleY(0);
     opacity: 0;
     transition: transform 0.4s ease, opacity 0.4s ease;
