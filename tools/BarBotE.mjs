@@ -39,7 +39,7 @@ export class BarBotE {
             // Ignore messages from bots 
             if (message.author.bot) return
 
-            if (message.channelId !== this.matchesChannelId) return
+            // if (message.channelId !== this.matchesChannelId) return
 
             // Respond to a specific message 
             if (message.content.toLowerCase() === 'bar') {
