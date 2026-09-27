@@ -25,8 +25,7 @@ class CalendarService {
 
         const oauth2Client = new google.auth.OAuth2(
             GOOGLE_CLIENT_ID,
-            GOOGLE_CLIENT_SECRET,
-            'urn:ietf:wg:oauth:2.0:oob'
+            GOOGLE_CLIENT_SECRET
         );
         oauth2Client.setCredentials({ refresh_token: GOOGLE_REFRESH_TOKEN });
 
