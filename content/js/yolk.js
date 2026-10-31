@@ -17,7 +17,7 @@ document.addEventListener('keydown', (event) => {
 
 // dimos on mobile and audio in all vesions
 let soundPlaying = false;
-const eye = new Audio('/sounds/matoklada.mp3');
+const eye = new Audio('/content/sounds/matoklada.mp3');
 document.addEventListener('keyup', (event)=>{
     const inputs = document.querySelectorAll('input');
     inputs.forEach(element => {

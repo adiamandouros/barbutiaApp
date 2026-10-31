@@ -5,12 +5,14 @@ import { engine } from 'express-handlebars'
 import { router } from './routes.mjs'
 import { BarBotE } from './tools/BarBotE.mjs'
 import { getNextMatch } from './model/matchController.mjs'
+import { createProcessGuard } from './tools/processGuard.mjs'
+import { assetUrl } from './tools/assetUrl.mjs'
 
 const app = express()
 
 app.use(compression())
 
-app.engine('hbs', engine({extname: ".hbs"}))
+app.engine('hbs', engine({extname: ".hbs", helpers: {asset: assetUrl}}))
 app.set('view engine', 'hbs')
 
 // Player images: 30 days, not immutable (photos may change between seasons)
@@ -47,6 +49,9 @@ app.use('/sounds', express.static(path.join('content', 'sounds'), {
 // Everything else in content (CSS, JS, favicons, etc.)
 app.use(express.static("content"))
 
+// The same files under /content. On the host LiteSpeed answers these before Express.
+app.use('/content', express.static("content"))
+
 //middleware gia na diavazei to request body
 app.use(express.urlencoded({extended: false}))
 
@@ -58,6 +63,8 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
     console.log(err.stack)
+    // A scrape failing after the page has gone out: there's nothing left to answer
+    if (res.headersSent) return
     res.render("error", { message: err.message })
 })
 
@@ -66,4 +73,7 @@ export default barBot
 
 const PORT = process.env.PORT || 3000
 
-app.listen(PORT, () => console.log("App has started in port " + PORT))
+app.listen(PORT, () => {
+    console.log("App has started in port " + PORT)
+    createProcessGuard().start()
+})

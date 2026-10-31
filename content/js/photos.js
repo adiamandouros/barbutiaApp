@@ -16,7 +16,7 @@ document.addEventListener('keyup', (event)=>{
     const inputs = document.querySelectorAll('input');
     inputs.forEach(element => {
       if(element.value=='dreamteam') {
-        modalImage.setAttribute('src', '/imgs/gallery/Original/mersini and me.jpg');
+        modalImage.setAttribute('src', '/content/imgs/gallery/Original/mersini and me.jpg');
         modalImage.setAttribute('alt', 'Well hello there!');
         imageDisplayer.show();
       }

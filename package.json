@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "app.mjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test --experimental-test-module-mocks",
     "start": "node app.mjs"
   },
   "keywords": [],
@@ -18,7 +18,7 @@
     "discord.js": "^14.25.1",
     "dotenv": "^17.2.3",
     "express": "^4.21.1",
-    "express-handlebars": "^8.0.1",
+    "express-handlebars": "8.0.1",
     "express-validator": "^7.2.0",
     "googleapis": "^144.0.0",
     "mysql2": "^3.15.1",
@@ -27,6 +27,8 @@
     "sqlite3": "^6.0.1"
   },
   "overrides": {
-    "undici": "^6.24.0"
+    "undici": "^6.24.0",
+    "uuid": "^11.1.1",
+    "glob": "^14.0.3"
   }
 }

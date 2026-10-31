@@ -7,6 +7,16 @@ export async function updateAllFutureMatchesInDB(matchesArray) {
     try {
         // Snapshot existing matches so we can carry over calendarEventIds and compute a diff
         const existingMatches = await FutureMatch.findAll({ transaction })
+
+        // An empty schedule is normal once every match has been played. While upcoming
+        // matches are stored it means the scrape went wrong, so nothing is touched.
+        const hasUpcoming = existingMatches.some(m => m.date && m.date.getTime() > Date.now())
+        if (matchesArray.length === 0 && hasUpcoming) {
+            console.error("Future match scrape found no matches, keeping the stored ones.")
+            await transaction.commit()
+            return { newMatches: [], updatedMatches: [], unchangedMatches: [], deletedEventIds: [] }
+        }
+
         const existingMap = new Map()
         for (const m of existingMatches) {
             const key = `${m.teamName}|${m.league}|${String(m.isHome)}`
@@ -42,10 +52,13 @@ export async function updateAllFutureMatchesInDB(matchesArray) {
             }
         }
 
-        // Anything left in existingMap was removed from the scraped data
+        // Anything left in existingMap was removed from the scraped data. Played matches
+        // drop off the schedule too, and those keep their event as a record of the match.
         const deletedEventIds = []
+        const now = Date.now()
         for (const [, val] of existingMap) {
-            if (val.calendarEventId) deletedEventIds.push(val.calendarEventId)
+            const played = val.date && val.date.getTime() <= now
+            if (val.calendarEventId && !played) deletedEventIds.push(val.calendarEventId)
         }
 
         // Replace all rows in one transaction (DELETE supports rollback, TRUNCATE does not)

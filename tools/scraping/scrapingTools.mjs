@@ -65,7 +65,7 @@ async function syncCalendarEvents({ newMatches, updatedMatches, unchangedMatches
         }
     }
 
-    // Matches no longer in the schedule: delete their events (404 = already gone, ignore)
+    // Upcoming matches no longer in the schedule: delete their events (404 = already gone, ignore)
     for (const eventId of deletedEventIds) {
         try {
             await calendarService.deleteMatchEvent(eventId)

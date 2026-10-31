@@ -13,7 +13,7 @@ export const getNextMatch = async (req, res, next) => {
         const nextMatch = await getNextMatchFromDB()
         const court = await nextMatch.getCourt()
         const ourTeam = "Μπαρμπούτια"
-        const ourLogo = "/imgs/logo-transparent.png"
+        const ourLogo = "/content/imgs/logo-transparent.png"
         const nextGame = []
         // req.nextGame = []
         if(nextMatch.isHome){
@@ -79,7 +79,7 @@ export const getFutureMatches = async (req, res, next) => {
             return;
         }
         
-        const ourLogo = "/imgs/logo-transparent.png";
+        const ourLogo = "/content/imgs/logo-transparent.png";
         req.futureMatches = await Promise.all(futureMatches.map(async match => {
             const court = await match.getCourt()
             const matchObj = match.toJSON()
@@ -166,7 +166,7 @@ export const searchMatches = async (req, res) => {
 }
 
 function massageCompletedMatchData(match) {
-    const ourLogo = "/imgs/logo-transparent.png"
+    const ourLogo = "/content/imgs/logo-transparent.png"
     const date = new Date(match.date)
     match.date = new Intl.DateTimeFormat('el-GR', { 
         day: '2-digit',

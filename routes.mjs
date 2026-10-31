@@ -1,5 +1,6 @@
 import express from 'express'
 import { PageSubtitle } from './tools/pageSubtitle.mjs'
+import { assetUrl } from './tools/assetUrl.mjs'
 import { scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats } from './tools/scraping/scrapingTools.mjs'
 import { getNextMatch, getFutureMatches, getCompletedMatches, searchMatches } from './model/matchController.mjs'
 import { getStandings } from './model/standingsController.mjs'
@@ -7,7 +8,7 @@ import { getRoster, searchPlayers } from './model/playersController.mjs'
 
 const router = express.Router()
 const pageSubtitle= new PageSubtitle()
-const scripts = [{script: 'js/yolk.js'}]
+const scripts = [{script: assetUrl('js/yolk.js')}]
 
 router.use((req, res, next) => {
     if (req.query.search) {
@@ -39,8 +40,9 @@ router.get("/", getNextMatch, async (req, res, next) => {
 
 // router.get("/", scrapePlayerStats)
 
-router.get("/roster", getRoster, async (req,res) => {
+router.get("/roster", getRoster, async (req, res, next) => {
     res.render("roster", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, players: req.roster, roster:true})
+    next()
 }, scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats)
 
 router.get("/matches", getFutureMatches, getCompletedMatches, async(req, res, next) => {
@@ -53,17 +55,20 @@ router.get("/standings", getStandings, (req, res, next) => {
     next()
 }, scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats)
 
-router.get("/synthimata", (req, res) => {
+router.get("/synthimata", (req, res, next) => {
     res.render("synthimata", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, content:true})
+    next()
 }, scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats)
 
-router.get("/photos", (req, res) => {
+router.get("/photos", (req, res, next) => {
     // scripts.push({ script: 'js/photos.js' })
     res.render("photos", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, content:true})
+    next()
 }, scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats)
 
-router.get("/videos", (req, res) => {
+router.get("/videos", (req, res, next) => {
     res.render("videos", {subtitle: pageSubtitle.getSubtitle(), scripts: scripts, content:true})
+    next()
 }, scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats)
 
 //API routes for fetching data (if needed)
@@ -90,8 +95,10 @@ router.get("/api/roster", getRoster, (req,res) => {
     res.json(req.roster)
 })
 
-router.get("/api/BAR", scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats, (req, res) => {
+// Answers first, like the pages: scrapePlayerStats ends the chain, so nothing runs after it
+router.get("/api/BAR", (req, res, next) => {
     res.send("BUTIA")
-})
+    next()
+}, scrapeFutureMatches, scrapeCompletedMatches, scrapeStandings, scrapePlayerStats)
 
 export {router}

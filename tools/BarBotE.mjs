@@ -14,7 +14,8 @@ export class BarBotE {
         'Ε ντε λα μαγκέ ντε Βοταlink',
         'Linkουίνι',
         'Λερόι Μερlink',
-        'Κακό σκυlink'
+        'Κακό σκυlink',
+        'Σε συζητάν να δώσεις link, και όχι άδικα'
     ]
 
     matchesChannelId = '1429525987485286593'
